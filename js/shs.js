@@ -253,7 +253,7 @@
     $field_orig = $('#' + base_id);
     $field_orig.val(0);
     // Set original field value.
-    if ($triggering_element.val() == 0) {
+    if ($triggering_element.val() == 0 || $triggering_element.val() == '_add_new_') {
       if (level > 1) {
         // Use value from parent level.
         $field_orig.val($triggering_element.prev('select').val());
