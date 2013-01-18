@@ -131,37 +131,6 @@ function shs_views_data_alter(&$data) {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
- */
-function shs_form_node_form_alter(&$form, &$form_state, $form_id) {
-  $instances = _shs_get_instances($form['#entity_type'], $form['#bundle']);
-  if (count($instances)) {
-    // Add custom submit callback.
-    array_unshift($form['#submit'], 'shs_node_form_submit');
-  }
-}
-
-/**
- * Custom submit callback for node forms with widgets of type "shs_taxonomy".
- *
- * @param <array> $form
- *   Submitted form.
- * @param <array> $form_state
- *   Current form state.
- */
-function shs_node_form_submit(&$form, &$form_state) {
-  $instances = _shs_get_instances($form['#entity_type'], $form['#bundle']);
-  foreach ($instances as $field_name => $instance) {
-    if (!empty($form_state['values'][$field_name][$form[$field_name]['#language']])) {
-      foreach ($form_state['values'][$field_name][$form[$field_name]['#language']] as $key => $value) {
-        // Rewrite value of element to match structure of term fields.
-        $form_state['values'][$field_name][$form[$field_name]['#language']][$key] = array('tid' => $value);
-      }
-    }
-  }
-}
-
-/**
  * Implements hook_field_widget_info().
  */
 function shs_field_widget_info() {
@@ -284,13 +253,25 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
   // Create (hidden) element.
   $element += array(
     '#type' => 'textfield',
-    '#default_value' => empty($items[$delta]['tid']) ? 0 : $items[$delta]['tid'],
+    '#default_value' => empty($items[$delta]) ? array('tid' => 0) : $items[$delta],
     '#attributes' => array(
       'class' => array('shs-enabled'),
     ),
+    '#value_callback' => 'shs_field_widget_value',
+    '#maxlength' => NULL, // Prevent errors with drupal_strlen().
   );
 
   return $element;
+}
+
+/**
+ * Value callback for widgets of type "taxonomy_shs".
+ */
+function shs_field_widget_value($element, $input = FALSE, $form_state = array()) {
+  if ($input) {
+    return array('tid' => $input);
+  }
+  return empty($element['#default_value']) ? array('tid' => 0) : $element['#default_value'];
 }
 
 /**

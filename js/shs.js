@@ -119,8 +119,12 @@
    *   Container for "Add new" elements.
    * @param term
    *   The new term object.
+   * @param base_id
+   *   ID of original field which is rewritten as "taxonomy_shs".
+   * @param level
+   *   Current level in hierarchy.
    */
-  termAddNew = function($triggering_element, $container, term) {
+  termAddNew = function($triggering_element, $container, term, base_id, level) {
     $.ajax({
       url: Drupal.settings.basePath + 'shs/json',
       type: 'POST',
@@ -147,6 +151,8 @@
           options[options.length] = new Option(data.data.name, data.data.tid);
           // Set new default value.
           $triggering_element.val(data.data.tid);
+          // Set value of original field.
+          updateFieldValue($triggering_element, base_id, level);
         }
       },
       error: function(xhr, status, error) {
@@ -228,7 +234,7 @@
             name: termName
           };
           if (termName.length > 0) {
-            termAddNew($triggering_element, $container, term);
+            termAddNew($triggering_element, $container, term, base_id, level);
           }
           else {
             // Remove container.
@@ -249,22 +255,9 @@
       getTermChildren($element_new, settings, $triggering_element.val(), 0);
     }
 
-    // Reset value of original field.
-    $field_orig = $('#' + base_id);
-    $field_orig.val(0);
-    // Set original field value.
-    if ($triggering_element.val() == 0 || $triggering_element.val() == '_add_new_') {
-      if (level > 1) {
-        // Use value from parent level.
-        $field_orig.val($triggering_element.prev('select').val());
-      }
-    }
-    else {
-      // Use value from current field.
-      $field_orig.val($triggering_element.val());
-    }
+    // Set value of original field.
+    updateFieldValue($triggering_element, base_id, level);
   }
-
 
   /**
    * Create a new <select> element.
@@ -290,6 +283,33 @@
       .hide(); // Initially hide the element.
     // Return the new element.
     return $element;
+  }
+
+  /**
+   * Update value of original (hidden) field.
+   *
+   * @param $triggering_element
+   *   Element which has been changed.
+   * @param base_id
+   *   ID of original field which is rewritten as "taxonomy_shs".
+   * @param level
+   *   Current level in hierarchy.
+   */
+  updateFieldValue = function($triggering_element, base_id, level) {
+    // Reset value of original field.
+    $field_orig = $('#' + base_id);
+    $field_orig.val(0);
+    // Set original field value.
+    if ($triggering_element.val() == 0 || $triggering_element.val() == '_add_new_') {
+      if (level > 1) {
+        // Use value from parent level.
+        $field_orig.val($triggering_element.prev('select').val());
+      }
+    }
+    else {
+      // Use value from current field.
+      $field_orig.val($triggering_element.val());
+    }
   }
 
 })(jQuery);
