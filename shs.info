@@ -1,0 +1,5 @@
+name = Simple hierarchical select
+core = 7.x
+description = Creates a simple hierarchical select widget for taxonomy fields.
+dependencies[] = taxonomy
+files[] = includes/handlers/shs_handler_filter_term_node_tid.inc
