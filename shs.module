@@ -294,6 +294,111 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
 }
 
 /**
+ * Implements hook_field_formatter_info().
+ */
+function shs_field_formatter_info() {
+  return array(
+    'shs_default' => array(
+      'label' => t('Simple hierarchy'),
+      'field types' => array('taxonomy_term_reference'),
+      'settings' => array(
+        'linked' => FALSE,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function shs_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $element = array();
+
+  if ($display['type'] == 'shs_default') {
+    $element['linked'] = array(
+      '#title' => t('Link to term page'),
+      '#type' => 'checkbox',
+      '#default_value' => $settings['linked'],
+    );
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function shs_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $summary = '';
+
+  if ($display['type'] == 'shs_default') {
+    $summary = t('Linked to term page: !linked', array('!linked' => $settings['linked'] ? t('Yes') : t('No')));
+  }
+
+  return $summary;
+}
+
+/**
+ * Implements hook_field_formatter_prepare_view().
+ */
+function shs_field_formatter_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $displays) {
+  foreach ($entities as $entity_id => $entity) {
+    foreach ($items[$entity_id] as $delta => $item) {
+      // Load list of parent terms.
+      $items[$entity_id][$delta]['parents'] = taxonomy_get_parents($item['tid']);
+      // Load term.
+      $items[$entity_id][$delta]['term'] = taxonomy_term_load($item['tid']);
+    }
+  }
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function shs_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $elements = array();
+  $settings = $display['settings'];
+
+  switch ($display['type']) {
+    case 'shs_default':
+      foreach ($items as $delta => $item) {
+        $list_items = array();
+        // Add parent term names.
+        foreach ($item['parents'] as $parent) {
+          $list_items[] = array(
+            'data' => $settings['linked'] ? l($parent->name, "taxonomy/term/{$parent->tid}") : $parent->name,
+            'class' => array('shs-parent'),
+          );
+        };
+        // Add name of selected term.
+        $list_items[] = array(
+          'data' => $settings['linked'] ? l($item['term']->name, "taxonomy/term/{$item['term']->tid}") : $item['term']->name,
+          'class' => array('shs-term-selected'),
+        );
+        $elements[$delta] = array(
+          '#items' => $list_items,
+          '#theme' => 'item_list',
+          '#attributes' => array(
+            'class' => 'shs-hierarchy',
+          ),
+        );
+      }
+
+      // Add basic style.
+      $elements['#attached']['css'][] = drupal_get_path('module', 'shs') . '/theme/shs.formatter.css';
+      break;
+  }
+
+  return $elements;
+}
+
+/**
  * JSON callback to get the list of children of a term.
  *
  * The structure is stored in the database cache as well as in drupal_static().
