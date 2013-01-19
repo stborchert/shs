@@ -40,6 +40,13 @@
               // Use current term id as parent id for the next level.
               parent_id = parent.tid;
             });
+            if (level > 1) {
+              // Try to add one additional level.
+              $select = shsElementCreate($field.attr('id'), settings.shs[fieldName], level);
+              $select.appendTo($field.parent());
+              // Retrieve data for this level.
+              getTermChildren($select, settings.shs[fieldName], parent_id, 0);
+            }
           }
         });
     }
