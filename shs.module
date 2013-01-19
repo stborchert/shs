@@ -219,11 +219,10 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
   }
   else {
     $selected_term = isset($items[$delta]['taxonomy_term']) ? $items[$delta]['taxonomy_term'] : taxonomy_term_load($items[$delta]['tid']);
-    $term_parents = taxonomy_get_parents($selected_term->tid);
-    foreach ($term_parents as $tid => $term) {
-      $parents[] = array('tid' => $tid);
+    $term_parents = taxonomy_get_parents_all($selected_term->tid);
+    foreach ($term_parents as $term) {
+      $parents[] = array('tid' => $term->tid);
     }
-    $parents[] = array('tid' => $selected_term->tid);
   }
 
   // Get vocabulary.
@@ -246,7 +245,7 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
         'vid' => $vocabulary->vid,
         'settings' => $instance['widget']['settings']['shs'],
         'default_value' => empty($items[$delta]['tid']) ? 0 : $items[$delta]['tid'],
-        'parents' => $parents,
+        'parents' => array_reverse($parents),
       ),
     ),
   );
@@ -372,7 +371,12 @@ function shs_field_formatter_prepare_view($entity_type, $entities, $field, $inst
   foreach ($entities as $entity_id => $entity) {
     foreach ($items[$entity_id] as $delta => $item) {
       // Load list of parent terms.
-      $items[$entity_id][$delta]['parents'] = taxonomy_get_parents($item['tid']);
+      $parents = taxonomy_get_parents_all($item['tid']);
+      // Remove current term from list.
+      array_shift($parents);
+      foreach (array_reverse($parents) as $parent) {
+        $items[$entity_id][$delta]['parents'][$parent->tid] = $parent;
+      }
       // Load term.
       $items[$entity_id][$delta]['term'] = taxonomy_term_load($item['tid']);
     }
