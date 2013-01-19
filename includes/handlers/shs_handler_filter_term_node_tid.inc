@@ -134,10 +134,12 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_many_to_one 
       }
 
       $parents = array();
-      if (!empty($default_value)) {
-        $term_parents = taxonomy_get_parents($default_value);
-        foreach ($term_parents as $tid => $term) {
-          $parents[] = array('tid' => $tid);
+      if (!empty($default_value) && $default_value != 'All') {
+        $term_parents = taxonomy_get_parents_all($default_value);
+        // Remove selected term from list.
+        array_shift($term_parents);
+        foreach (array_reverse($term_parents) as $term) {
+          $parents[] = array('tid' => $term->tid);
         }
         // Add current term (name not needed).
         $parents[] = array('tid' => $default_value);
@@ -398,7 +400,6 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_many_to_one 
     $this->value_options = array();
 
     if ($this->value) {
-      $this->value = array_filter($this->value);
       $result = db_select('taxonomy_term_data', 'td')
               ->fields('td')
               ->condition('td.tid', $this->value)

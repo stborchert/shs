@@ -370,6 +370,7 @@ function shs_field_formatter_settings_summary($field, $instance, $view_mode) {
 function shs_field_formatter_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $displays) {
   foreach ($entities as $entity_id => $entity) {
     foreach ($items[$entity_id] as $delta => $item) {
+      $items[$entity_id][$delta]['parents'] = array();
       // Load list of parent terms.
       $parents = taxonomy_get_parents_all($item['tid']);
       // Remove current term from list.
