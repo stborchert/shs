@@ -12,7 +12,8 @@ Taxonomy module (Drupal core) needs to be enabled.
 
 -- INSTALLATION --
 
-* Install as usual, see http://drupal.org/node/70151 for further information.
+* Install as usual, see http://drupal.org/documentation/install/modules-themes/modules-7
+  for further information.
 
 
 -- CONFIGURATION --
