@@ -33,6 +33,8 @@ Taxonomy module (Drupal core) needs to be enabled.
   - "Allow creating new levels"
     If selected users with permission to create terms in the vocabulary will be
     able to create a new term as child of the currently selected term.
+  - "Force selection of deepest level"
+    Force users to select terms from the deepest level.
 
 * Views (exposed filter)
   - add a new filter using the field set-up as "Simple hierarchical select"
