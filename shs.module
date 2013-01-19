@@ -143,6 +143,7 @@ function shs_field_widget_info() {
           'node_count' => FALSE,
           'create_new_terms' => FALSE,
           'create_new_levels' => FALSE,
+          'force_deepest' => FALSE,
         )
       ),
     ),
@@ -187,6 +188,12 @@ function shs_field_widget_settings_form($field, $instance) {
         ':input[name="instance[widget][settings][shs][create_new_terms]"]' => array('checked' => TRUE),
       ),
     ),
+  );
+  $form['shs']['force_deepest'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Force selection of deepest level'),
+    '#description' => t('If checked the user will be forced to select terms from the deepest level.'),
+    '#default_value' => empty($settings['shs']['force_deepest']) ? FALSE : $settings['shs']['force_deepest'],
   );
 
   return $form;
@@ -250,7 +257,7 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
   // Add styles.
   drupal_add_css(drupal_get_path('module', 'shs') . '/theme/shs.form.css');
 
-  // Create (hidden) element.
+  // Create element.
   $element += array(
     '#type' => 'textfield',
     '#default_value' => empty($items[$delta]) ? array('tid' => 0) : $items[$delta],
@@ -259,6 +266,7 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
     ),
     '#value_callback' => 'shs_field_widget_value',
     '#maxlength' => NULL, // Prevent errors with drupal_strlen().
+    '#element_validate' => array('shs_field_widget_validate'),
   );
 
   return $element;
@@ -272,6 +280,38 @@ function shs_field_widget_value($element, $input = FALSE, $form_state = array())
     return array('tid' => $input);
   }
   return empty($element['#default_value']) ? array('tid' => 0) : $element['#default_value'];
+}
+
+/**
+ * Validation handler for widgets of type "taxonomy_shs".
+ */
+function shs_field_widget_validate($element, &$form_state, $form) {
+  $field_name = $element['#field_name'];
+  $field_language = $element['#language'];
+
+  if (empty($form_state['field'][$field_name][$field_language]['instance']['widget'])) {
+    return;
+  }
+  $field = $form_state['field'][$field_name][$field_language];
+  $instance = $field['instance'];
+  $settings = empty($instance['widget']['settings']['shs']) ? array() : $instance['widget']['settings']['shs'];
+
+  // Do we want to force the user to select terms from the deepest level?
+  $force_deepest_level = empty($settings['force_deepest']) ? FALSE : $settings['force_deepest'];
+  $value = empty($element['#value']['tid']) ? 0 : $element['#value']['tid'];
+  if ($force_deepest_level && $value) {
+    // Get vocabulary.
+    $allowed_values = reset($field['field']['settings']['allowed_values']);
+    if (empty($allowed_values['vocabulary']) || ($vocabulary = taxonomy_vocabulary_machine_name_load($allowed_values['vocabulary'])) === FALSE) {
+      // No vocabulary selected yet or vocabulary not found.
+      form_error($element, t('Vocabulary %machine_name is configured as source for field %field_name but could not be found.', array('%machine_name' => $allowed_values['vocabulary'], '%field_name' => $field_name)));
+    }
+    // Does the selected term has any children?
+    $children = shs_term_get_children($vocabulary->vid, $value);
+    if (count($children)) {
+      form_error($element, t('You need to select a term from the deepest level.'));
+    }
+  }
 }
 
 /**

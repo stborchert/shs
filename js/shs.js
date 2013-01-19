@@ -30,6 +30,10 @@
               level++;
               // Create select element.
               $select = shsElementCreate($field.attr('id'), settings.shs[fieldName], level);
+              if ($field.hasClass('error')) {
+                // Add error-class if there was an error with the original field.
+                $select.addClass('error');
+              }
               $select.appendTo($field.parent());
               // Retrieve data for this level.
               getTermChildren($select, settings.shs[fieldName], parent_id, parent.tid);
