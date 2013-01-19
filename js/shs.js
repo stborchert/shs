@@ -114,6 +114,7 @@
           $element.val(default_value);
 
           $element.fadeIn();
+          $element.css('display','inline-block');
         }
       },
       error: function(xhr, status, error) {
@@ -175,6 +176,7 @@
         $container.remove();
         // Display triggering element.
         $triggering_element.fadeIn();
+        $triggering_element.css('display','inline-block');
       }
     });
   }
@@ -229,6 +231,7 @@
           $triggering_element.val(0);
           // Display triggering element.
           $triggering_element.fadeIn();
+          $triggering_element.css('display','inline-block');
         });
       $cancel.appendTo($buttons);
       $save = $('<a>')
@@ -254,6 +257,7 @@
             $triggering_element.val(0);
             // Display triggering element.
             $triggering_element.fadeIn();
+            $triggering_element.css('display','inline-block');;
           }
         });
       $save.appendTo($buttons);
