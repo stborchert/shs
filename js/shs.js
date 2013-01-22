@@ -40,7 +40,7 @@
               // Use current term id as parent id for the next level.
               parent_id = parent.tid;
             });
-            if (level > 1 && (settings.shs[fieldName].settings.create_new_terms && settings.shs[fieldName].settings.create_new_levels)) {
+            if ((level > 1 || parent_id) && (settings.shs[fieldName].settings.create_new_terms && settings.shs[fieldName].settings.create_new_levels)) {
               // Try to add one additional level.
               $select = shsElementCreate($field.attr('id'), settings.shs[fieldName], level);
               $select.appendTo($field.parent());
