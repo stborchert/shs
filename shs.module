@@ -259,7 +259,7 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
   // Create element.
   $element += array(
     '#type' => 'textfield',
-    '#default_value' => empty($items[$delta]) ? array('tid' => 0) : $items[$delta],
+    '#default_value' => empty($items[$delta]) ? array('tid' => NULL) : $items[$delta],
     '#attributes' => array(
       'class' => array('shs-enabled'),
     ),
@@ -278,7 +278,7 @@ function shs_field_widget_value($element, $input = FALSE, $form_state = array())
   if ($input) {
     return array('tid' => $input);
   }
-  return empty($element['#default_value']) ? array('tid' => 0) : $element['#default_value'];
+  return empty($element['#default_value']) ? array('tid' => NULL) : $element['#default_value'];
 }
 
 /**
@@ -394,6 +394,9 @@ function shs_field_formatter_view($entity_type, $entity, $field, $instance, $lan
   switch ($display['type']) {
     case 'shs_default':
       foreach ($items as $delta => $item) {
+        if (empty($item['tid'])) {
+          continue;
+        }
         $list_items = array();
         // Add parent term names.
         foreach ($item['parents'] as $parent) {
