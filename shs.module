@@ -241,7 +241,7 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
   // Create settings needed for our js magic.
   $settings_js = array(
     'shs' => array(
-      "{$element['#field_name']}[{$element['#language']}][{$delta}]" => array(
+      "{$element['#field_name']}[{$element['#language']}][{$delta}][tid]" => array(
         'vid' => $vocabulary->vid,
         'settings' => $instance['widget']['settings']['shs'],
         'default_value' => empty($items[$delta]['tid']) ? 0 : $items[$delta]['tid'],
@@ -263,22 +263,11 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
     '#attributes' => array(
       'class' => array('shs-enabled'),
     ),
-    '#value_callback' => 'shs_field_widget_value',
     '#maxlength' => NULL, // Prevent errors with drupal_strlen().
     '#element_validate' => array('shs_field_widget_validate'),
   );
 
-  return $element;
-}
-
-/**
- * Value callback for widgets of type "taxonomy_shs".
- */
-function shs_field_widget_value($element, $input = FALSE, $form_state = array()) {
-  if ($input) {
-    return array('tid' => $input);
-  }
-  return empty($element['#default_value']) ? array('tid' => NULL) : $element['#default_value'];
+  return array('tid' => $element);
 }
 
 /**
@@ -297,7 +286,7 @@ function shs_field_widget_validate($element, &$form_state, $form) {
 
   // Do we want to force the user to select terms from the deepest level?
   $force_deepest_level = empty($settings['force_deepest']) ? FALSE : $settings['force_deepest'];
-  $value = empty($element['#value']['tid']) ? 0 : $element['#value']['tid'];
+  $value = empty($element['#value']) ? 0 : $element['#value'];
   if ($force_deepest_level && $value) {
     // Get vocabulary.
     $allowed_values = reset($field['field']['settings']['allowed_values']);
