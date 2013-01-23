@@ -213,12 +213,23 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
   // Get value.
   $selected_term = NULL;
   $parents = array();
-  if (empty($items[$delta]['tid'])) {
+
+  $element_value = NULL;
+  if (!empty($items[$delta]['tid'])) {
+    // Use saved value from database or cache.
+    $element_value = $items[$delta]['tid'];
+  }
+  elseif (!empty($form_state['values'][$element['#field_name']][$element['#language']][$delta]['tid'])) {
+    // Use value from form_state (for example for fields with cardinality = -1.
+    $element_value = $form_state['values'][$element['#field_name']][$element['#language']][$delta]['tid'];
+  }
+
+  if (empty($element_value)) {
     // Add fake parent for new items.
     $parents[] = array('tid' => 0);
   }
   else {
-    $selected_term = isset($items[$delta]['taxonomy_term']) ? $items[$delta]['taxonomy_term'] : taxonomy_term_load($items[$delta]['tid']);
+    $selected_term = isset($items[$delta]['taxonomy_term']) ? $items[$delta]['taxonomy_term'] : taxonomy_term_load($element_value);
     $term_parents = taxonomy_get_parents_all($selected_term->tid);
     foreach ($term_parents as $term) {
       $parents[] = array('tid' => $term->tid);
@@ -244,7 +255,7 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
       "{$element['#field_name']}[{$element['#language']}][{$delta}][tid]" => array(
         'vid' => $vocabulary->vid,
         'settings' => $instance['widget']['settings']['shs'],
-        'default_value' => empty($items[$delta]['tid']) ? 0 : $items[$delta]['tid'],
+        'default_value' => empty($element_value) ? 0 : $element_value,
         'parents' => array_reverse($parents),
       ),
     ),
@@ -259,7 +270,7 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
   // Create element.
   $element += array(
     '#type' => 'textfield',
-    '#default_value' => empty($items[$delta]) ? array('tid' => NULL) : $items[$delta],
+    '#default_value' => empty($element_value) ? array('tid' => NULL) : array('tid' => $element_value),
     '#attributes' => array(
       'class' => array('shs-enabled'),
     ),
