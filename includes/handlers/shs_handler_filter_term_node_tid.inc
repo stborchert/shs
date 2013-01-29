@@ -35,7 +35,8 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_many_to_one 
     return TRUE;
   }
 
-  function get_value_options() { /* don't overwrite the value options */
+  function get_value_options() {
+    // Do not overwrite the value options.
   }
 
   function option_definition() {
@@ -78,7 +79,11 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_many_to_one 
     $form['type'] = array(
       '#type' => 'radios',
       '#title' => t('Selection type'),
-      '#options' => array('shs' => t('Simple hierarchical select'), 'select' => t('Dropdown'), 'textfield' => t('Autocomplete')),
+      '#options' => array(
+        'shs' => t('Simple hierarchical select'),
+        'select' => t('Dropdown'),
+        'textfield' => t('Autocomplete')
+      ),
       '#default_value' => $this->options['type'],
     );
 
@@ -254,7 +259,7 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_many_to_one 
 
 
     if (empty($form_state['exposed'])) {
-      // Retain the helper option
+      // Retain the helper option.
       $this->helper->options_form($form, $form_state);
     }
   }
@@ -380,7 +385,7 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_many_to_one 
   }
 
   function value_submit($form, &$form_state) {
-    // prevent array_filter from messing up our arrays in parent submit.
+    // Prevent array_filter from messing up our arrays in parent submit.
   }
 
   function expose_form(&$form, &$form_state) {
@@ -396,7 +401,7 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_many_to_one 
   }
 
   function admin_summary() {
-    // set up $this->value_options for the parent summary
+    // Set up $this->value_options for the parent summary.
     $this->value_options = array();
 
     if ($this->value) {

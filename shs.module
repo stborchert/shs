@@ -144,7 +144,7 @@ function shs_field_widget_info() {
           'create_new_terms' => FALSE,
           'create_new_levels' => FALSE,
           'force_deepest' => FALSE,
-        )
+        ),
       ),
     ),
   );
@@ -545,9 +545,9 @@ function shs_json_term_add($vid, $parent, $term_name) {
   }
 
   $term = (object) array(
-            'vid' => $vid,
-            'parent' => $parent,
-            'name' => check_plain(filter_xss($term_name)),
+    'vid' => $vid,
+    'parent' => $parent,
+    'name' => check_plain(filter_xss($term_name)),
   );
   // Save term.
   $status = taxonomy_term_save($term);
