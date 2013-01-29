@@ -267,6 +267,16 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
   // Add styles.
   drupal_add_css(drupal_get_path('module', 'shs') . '/theme/shs.form.css');
 
+  // Element is required and there is no initial value.
+  if (empty($element_value) && $element['#required']) {
+    // Load list of options.
+    $options = shs_term_get_children($vocabulary->vid, 0);
+    if (count($options)) {
+      // Set element value to first available option.
+      $element_value = reset(array_keys($options));
+    }
+  }
+
   // Create element.
   $element += array(
     '#type' => 'textfield',
