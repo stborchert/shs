@@ -579,6 +579,21 @@ function shs_taxonomy_term_update($term) {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
+function shs_form_taxonomy_overview_terms_alter(&$form, &$form_state, $form_id) {
+  $form['#submit'][] = 'shs_form_taxonomy_overview_terms_submit';
+}
+
+/**
+ * Implements hook_hook_taxonomy_term_delete().
+ */
+function shs_form_taxonomy_overview_terms_submit(&$form, &$form_state) {
+  // Update vocabulary cache for the terms parents.
+  shs_term_get_children($form_state['complete_form']['#vocabulary']->vid, 0, array('node_count' => TRUE), TRUE);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
 function shs_form_taxonomy_form_term_alter(&$form, &$form_state, $form_id) {
   if (isset($form_state['confirm_delete']) && isset($form_state['values']['vid'])) {
     // Add custom submit handler to update cache.
