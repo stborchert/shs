@@ -588,7 +588,7 @@ function shs_form_taxonomy_overview_terms_alter(&$form, &$form_state, $form_id) 
  */
 function shs_form_taxonomy_overview_terms_submit(&$form, &$form_state) {
   // Update vocabulary cache for the terms parents.
-  shs_term_get_children($form_state['complete_form']['#vocabulary']->vid, 0, array('node_count' => TRUE), TRUE);
+  shs_term_get_children($form_state['complete form']['#vocabulary']->vid, 0, array('node_count' => TRUE), TRUE);
 }
 
 /**
