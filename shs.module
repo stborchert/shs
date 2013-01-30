@@ -128,6 +128,16 @@ function shs_views_data_alter(&$data) {
       }
     }
   }
+
+  // Add filter handler for term ID with depth.
+  $data['node']['shs_term_node_tid_depth'] = array(
+    'help' => t('Display content if it has the selected taxonomy terms, or children of the selected terms. Due to additional complexity, this has fewer options than the versions without depth. Optionally the filter will use a simple hierarchical select for the selection of terms.'),
+    'real field' => 'nid',
+    'filter' => array(
+      'title' => t('Has taxonomy terms (with depth; %type)', array('%type' => 'Simple hierarchical select')),
+      'handler' => 'shs_handler_filter_term_node_tid_depth',
+    ),
+  );
 }
 
 /**

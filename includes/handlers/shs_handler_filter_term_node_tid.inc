@@ -12,7 +12,6 @@
  */
 class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_tid {
 
-
   function option_definition() {
     $options = parent::option_definition();
 
@@ -22,9 +21,9 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
   }
 
   function extra_options_form(&$form, &$form_state) {
-    $form = parent::extra_options_form($form, $form_state);
+    parent::extra_options_form($form, $form_state);
 
-    $form['type']['#options'] =+ array(
+    $form['type']['#options'] += array(
       'shs' => t('Simple hierarchical select'),
     );
   }
@@ -95,6 +94,17 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
       // Retain the helper option.
       $this->helper->options_form($form, $form_state);
     }
+  }
+
+  function admin_summary() {
+    // Set up $this->value_options for the parent summary.
+    $this->value_options = array();
+
+    if ($this->value == 'All') {
+      $this->value = NULL;
+    }
+
+    return parent::admin_summary();
   }
 
 }
