@@ -355,7 +355,10 @@
       options.placeholder_text_single = Drupal.settings.chosen.placeholder_text_single;
       options.no_results_text = Drupal.settings.chosen.no_results_text;
 
-      if ($element.find('option').size() >= Drupal.settings.chosen.minimum) {
+      // Get element selector from settings (and remove "visible" option since
+      // our select element is hidden by default).
+      var selector = Drupal.settings.chosen.selector.replace(/:visible/, '');
+      if ($element.is(selector) && $element.find('option').size() >= Drupal.settings.chosen.minimum) {
         $element.css({
           width : ($element.width() < minWidth) ? minWidth : $element.width()
         }).chosen(options);
