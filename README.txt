@@ -43,6 +43,18 @@ Taxonomy module (Drupal core) needs to be enabled.
   - enjoy :)
 
 
+-- INTEGRATION WITH OTHER MODULES --
+
+* Chosen (http://drupal.org/project/chosen)
+  - If you have installed the module "Chosen" all elements of
+    "Simple hierarchical select" are modified, so the user can search for items
+    within the list. See http://drupal.org/project/chosen for more information.
+  - If you have configured "Chosen" to apply always but do not want to apply it
+    to the dropdowns created by "Simple hierarchical select" you may use the
+    following CSS selector in the "Chosen" configuration:
+    <code>select:visible:not(.shs-select)</code>
+
+
 -- CONTACT --
 
 Current maintainers:
