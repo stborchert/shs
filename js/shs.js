@@ -113,8 +113,12 @@
           // Set default value.
           $element.val(default_value);
 
-          $element.fadeIn();
-          $element.css('display','inline-block');
+          // Try to convert the element to a "Chosen" element.
+          if (!elementConvertToChosen($element)) {
+            // Display original dropdown element.
+            $element.fadeIn();
+            $element.css('display','inline-block');
+          }
         }
       },
       error: function(xhr, status, error) {
@@ -195,7 +199,16 @@
    */
   updateElements = function($triggering_element, base_id, settings, level) {
     // Remove all following elements.
-    $triggering_element.nextAll('select').remove();
+    $triggering_element.nextAll('select').each(function() {
+      if (Drupal.settings.chosen) {
+        // Remove element created by chosen.
+        var elem_id = $(this).attr('id');
+        $('#' + elem_id.replace(/-/g, '_') + '_chzn').remove();
+      }
+      // Remove element.
+      $(this).remove();
+    });
+    //$triggering_element.nextAll('.chzn-container').remove();
     $triggering_element.nextAll('.shs-term-add-new-wrapper').remove();
     // Create next level (if the value is != 0).
     if ($triggering_element.val() == '_add_new_') {
@@ -325,6 +338,31 @@
       // Use value from current field.
       $field_orig.val($triggering_element.val());
     }
+  }
+
+  /**
+   * Convert a dropdown to a "Chosen" element.
+   *
+   * @see http://drupal.org/project/chosen
+   */
+  elementConvertToChosen = function($element) {
+    if (Drupal.settings.chosen) {
+      var minWidth = Drupal.settings.chosen.minimum_width;
+      // Define options for chosen.
+      var options = {};
+      options.search_contains = Drupal.settings.chosen.search_contains;
+      options.placeholder_text_multiple = Drupal.settings.chosen.placeholder_text_multiple;
+      options.placeholder_text_single = Drupal.settings.chosen.placeholder_text_single;
+      options.no_results_text = Drupal.settings.chosen.no_results_text;
+
+      if ($element.find('option').size() >= Drupal.settings.chosen.minimum) {
+        $element.css({
+          width : ($element.width() < minWidth) ? minWidth : $element.width()
+        }).chosen(options);
+        return true;
+      }
+    }
+    return false;
   }
 
 })(jQuery);
