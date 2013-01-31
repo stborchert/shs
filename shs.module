@@ -275,44 +275,57 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
  * Afterbuild callback for widgets of type "taxonomy_shs".
  */
 function shs_field_widget_afterbuild($element, &$form_state) {
+  $js_added = &drupal_static(__FUNCTION__, array());
+
   $parents = array();
   // Get value from element.
   if (!empty($form_state['values'][$element['#field_name']][$element['#language']][$element['#delta']]['tid'])) {
     // Use value from form_state (for example for fields with cardinality = -1).
     $element['#default_value'] = $form_state['values'][$element['#field_name']][$element['#language']][$element['#delta']];
   }
-  $element_value = $element['#default_value']['tid'];
 
-  if (empty($element_value)) {
-    // Add fake parent for new items.
-    $parents[] = array('tid' => 0);
+  // Add main Javascript behavior and style only once.
+  if (count($js_added) == 0) {
+    // Add behavior.
+    drupal_add_js(drupal_get_path('module', 'shs') . '/js/shs.js');
+    // Add styles.
+    drupal_add_css(drupal_get_path('module', 'shs') . '/theme/shs.form.css');
   }
-  else {
-    $term_parents = taxonomy_get_parents_all($element_value);
-    foreach ($term_parents as $term) {
-      // Create term lineage.
-      $parents[] = array('tid' => $term->tid);
+
+  // Create Javascript settings for the element only if it hasn't been added
+  // before.
+  if (empty($js_added[$element['#name']])) {
+    $element_value = $element['#default_value']['tid'];
+
+    if (empty($element_value)) {
+      // Add fake parent for new items.
+      $parents[] = array('tid' => 0);
     }
-  }
+    else {
+      $term_parents = taxonomy_get_parents_all($element_value);
+      foreach ($term_parents as $term) {
+        // Create term lineage.
+        $parents[] = array('tid' => $term->tid);
+      }
+    }
 
-  // Create settings needed for our js magic.
-  $settings_js = array(
-    'shs' => array(
-      "{$element['#name']}" => array(
-        'vid' => $element['#shs_vocabulary']->vid,
-        'settings' => $element['#shs_settings'],
-        'default_value' => $element['#default_value'],
-        'parents' => array_reverse($parents),
+    // Create settings needed for our js magic.
+    $settings_js = array(
+      'shs' => array(
+        "{$element['#name']}" => array(
+          'vid' => $element['#shs_vocabulary']->vid,
+          'settings' => $element['#shs_settings'],
+          'default_value' => $element['#default_value'],
+          'parents' => array_reverse($parents),
+        ),
       ),
-    ),
-  );
+    );
 
-  // Add settings.
-  drupal_add_js($settings_js, 'setting');
-  // Add behavior.
-  drupal_add_js(drupal_get_path('module', 'shs') . '/js/shs.js');
-  // Add styles.
-  drupal_add_css(drupal_get_path('module', 'shs') . '/theme/shs.form.css');
+    // Add settings.
+    drupal_add_js($settings_js, 'setting');
+
+    $js_added[$element['#name']] = TRUE;
+  }
 
   return $element;
 }
