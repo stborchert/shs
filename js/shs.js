@@ -114,7 +114,7 @@
           $element.val(default_value);
 
           // Try to convert the element to a "Chosen" element.
-          if (!elementConvertToChosen($element)) {
+          if (!elementConvertToChosen($element, settings)) {
             // Display original dropdown element.
             $element.fadeIn();
             $element.css('display','inline-block');
@@ -345,7 +345,7 @@
    *
    * @see http://drupal.org/project/chosen
    */
-  elementConvertToChosen = function($element) {
+  elementConvertToChosen = function($element, settings) {
     if (Drupal.settings.chosen) {
       var minWidth = Drupal.settings.chosen.minimum_width;
       // Define options for chosen.
@@ -358,7 +358,7 @@
       // Get element selector from settings (and remove "visible" option since
       // our select element is hidden by default).
       var selector = Drupal.settings.chosen.selector.replace(/:visible/, '');
-      if ($element.is(selector) && $element.find('option').size() >= Drupal.settings.chosen.minimum) {
+      if (settings.settings.use_chosen || ($element.is(selector)) && $element.find('option').size() >= Drupal.settings.chosen.minimum) {
         $element.css({
           width : ($element.width() < minWidth) ? minWidth : $element.width()
         }).chosen(options);

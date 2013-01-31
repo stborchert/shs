@@ -46,13 +46,17 @@ Taxonomy module (Drupal core) needs to be enabled.
 -- INTEGRATION WITH OTHER MODULES --
 
 * Chosen (http://drupal.org/project/chosen)
-  - If you have installed the module "Chosen" all elements of
+  - If you have installed the module "Chosen" (>= 7.x-2.x) all elements of
     "Simple hierarchical select" are modified, so the user can search for items
     within the list. See http://drupal.org/project/chosen for more information.
   - If you have configured "Chosen" to apply always but do not want to apply it
     to the dropdowns created by "Simple hierarchical select" you may use the
     following CSS selector in the "Chosen" configuration:
     <code>select:visible:not(.shs-select)</code>
+  - Apart from that you can decide to use chosen for a single field by setting
+    the option "Use Chosen for this field" in the field configuration. This will
+    override the settings made for Chosen itself (for example "Minimum number of
+    options").
 
 
 -- CONTACT --

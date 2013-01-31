@@ -206,6 +206,16 @@ function shs_field_widget_settings_form($field, $instance) {
     '#default_value' => empty($settings['shs']['force_deepest']) ? FALSE : $settings['shs']['force_deepest'],
   );
 
+  // "Chosen" integration.
+  if (module_exists('chosen')) {
+    $form['shs']['use_chosen'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use !chosen for this field', array('!chosen' => l(t('Chosen'), 'http://drupal.org/project/chosen'))),
+      '#description' => t('If checked the element will use the !chosen module for the term selection of each level.', array('!chosen' => l(t('Chosen'), 'http://drupal.org/project/chosen'))),
+      '#default_value' => empty($settings['shs']['use_chosen']) ? FALSE : $settings['shs']['use_chosen'],
+    );
+  }
+
   return $form;
 }
 
