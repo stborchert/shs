@@ -71,7 +71,7 @@
       dataType: 'json',
       cache: true,
       data: {
-        callback: 'shs_term_get_children',
+        callback: 'shs_json_term_get_children',
         arguments: {
           vid: settings.vid,
           parent: parent_value,
@@ -107,8 +107,8 @@
           }
 
           // Add retrieved list of options.
-          $.each(data.data, function(value, label) {
-            options[options.length] = new Option(label, value);
+          $.each(data.data, function(key, term) {
+            options[options.length] = new Option(term.label, term.tid);
           });
           // Set default value.
           $element.val(default_value);

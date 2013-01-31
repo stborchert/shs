@@ -62,7 +62,7 @@ function shs_json() {
  */
 function shs_json_callbacks() {
   $callbacks = array(
-    'shs_term_get_children' => array(
+    'shs_json_term_get_children' => array(
       'arguments' => array(
         'vid' => 'is_numeric',
         'parent' => 'is_numeric',
@@ -477,7 +477,7 @@ function shs_field_formatter_view($entity_type, $entity, $field, $instance, $lan
 }
 
 /**
- * JSON callback to get the list of children of a term.
+ * Function to get the list of children of a term.
  *
  * The structure is stored in the database cache as well as in drupal_static().
  * Cache has the following structure:
@@ -548,6 +548,35 @@ function shs_term_get_children($vid, $parent = 0, $settings = array(), $reset = 
   return empty($terms[$vid][$parent][$node_count]) ? array() : $terms[$vid][$parent][$node_count];
 }
 
+/**
+ * JSON callback to get the list of children of a term.
+ *
+ * @param <int> $vid
+ *   ID of vocabulary the term is associated to.
+ * @param <int> $parent
+ *   ID of parent term.
+ * @param <array> $settings
+ *   Additional settings (for example "display node count").
+ *
+ * @return <array>
+ *   Associative list of child terms.
+ *
+ * @see shs_term_get_children()
+ */
+function shs_json_term_get_children($vid, $parent = 0, $settings = array()) {
+  $result = array();
+  $terms = shs_term_get_children($vid, $parent, $settings);
+
+  // Rewrite result set to preserve original sort of terms through JSON request.
+  foreach ($terms as $tid => $label) {
+    $result[] = array(
+      'tid' => $tid,
+      'label' => $label,
+    );
+  }
+
+  return $result;
+}
 /**
  * Adds a term with ajax.
  *
