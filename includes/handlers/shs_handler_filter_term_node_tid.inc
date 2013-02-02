@@ -61,14 +61,20 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
       }
       // Add fake item for next level.
       $parents[] = array('tid' => 0);
+
+      // Generate a random hash to avoid merging of settings by drupal_add_js.
+      // This is necessary until http://drupal.org/node/208611 lands for D7.
+      $js_hash = _shs_create_hash();
       // Create settings needed for our js magic.
       $settings_js = array(
         'shs' => array(
-          $identifier => array(
-            'vid' => $vocabulary->vid,
-            'settings' => array(),
-            'default_value' => $default_value,
-            'parents' => $parents,
+          $js_hash => array(
+            $identifier => array(
+              'vid' => $vocabulary->vid,
+              'settings' => array(),
+              'default_value' => $default_value,
+              'parents' => $parents,
+            ),
           ),
         ),
       );

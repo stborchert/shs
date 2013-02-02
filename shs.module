@@ -285,7 +285,14 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
  * Afterbuild callback for widgets of type "taxonomy_shs".
  */
 function shs_field_widget_afterbuild($element, &$form_state) {
-  $js_added = &drupal_static(__FUNCTION__, array());
+  $js_added = &drupal_static(__FUNCTION__ . '_js_added', array());
+  // Generate a random hash to avoid merging of settings by drupal_add_js.
+  // This is necessary until http://drupal.org/node/208611 lands for D7.
+  $js_hash = &drupal_static(__FUNCTION__ . '_js_hash');
+
+  if (empty($js_hash)) {
+    $js_hash = _shs_create_hash();
+  }
 
   $parents = array();
   // Get value from element.
@@ -304,7 +311,7 @@ function shs_field_widget_afterbuild($element, &$form_state) {
 
   // Create Javascript settings for the element only if it hasn't been added
   // before.
-  if (empty($js_added[$element['#name']])) {
+  if (empty($js_added[$js_hash][$element['#name']])) {
     $element_value = $element['#default_value']['tid'];
 
     if (empty($element_value)) {
@@ -322,11 +329,13 @@ function shs_field_widget_afterbuild($element, &$form_state) {
     // Create settings needed for our js magic.
     $settings_js = array(
       'shs' => array(
-        "{$element['#name']}" => array(
-          'vid' => $element['#shs_vocabulary']->vid,
-          'settings' => $element['#shs_settings'],
-          'default_value' => $element['#default_value'],
-          'parents' => array_reverse($parents),
+        $js_hash => array(
+          "{$element['#name']}" => array(
+            'vid' => $element['#shs_vocabulary']->vid,
+            'settings' => $element['#shs_settings'],
+            'default_value' => $element['#default_value'],
+            'parents' => array_reverse($parents),
+          ),
         ),
       ),
     );
@@ -334,7 +343,10 @@ function shs_field_widget_afterbuild($element, &$form_state) {
     // Add settings.
     drupal_add_js($settings_js, 'setting');
 
-    $js_added[$element['#name']] = TRUE;
+    if (empty($js_added[$js_hash])) {
+      $js_added[$js_hash] = array();
+    }
+    $js_added[$js_hash][$element['#name']] = TRUE;
   }
 
   return $element;
@@ -756,4 +768,25 @@ function _shs_term_get_node_count($term, $count_children = FALSE) {
   }
 
   return isset($num_nodes["{$term->tid}:{$count_children}"]) ? $num_nodes["{$term->tid}:{$count_children}"] : 0;
+}
+
+/**
+ * Helper function to create a pseudo hash needed for javascript settings.
+ *
+ * @param <int> $length
+ *   Lenght of string to return.
+ *
+ * @return <string>
+ *   Random string.
+ *
+ * @see DrupalTestCase::randomName()
+ */
+function _shs_create_hash($length = 8) {
+  $values = array_merge(range(65, 90), range(97, 122), range(48, 57));
+  $max = count($values) - 1;
+  $hash = chr(mt_rand(97, 122));
+  for ($i = 1; $i < $length; $i++) {
+    $hash .= chr($values[mt_rand(0, $max)]);
+  }
+  return $hash;
 }
