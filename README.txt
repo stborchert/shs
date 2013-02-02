@@ -53,10 +53,16 @@ Taxonomy module (Drupal core) needs to be enabled.
     to the dropdowns created by "Simple hierarchical select" you may use the
     following CSS selector in the "Chosen" configuration:
     <code>select:visible:not(.shs-select)</code>
-  - Apart from that you can decide to use chosen for a single field by setting
-    the option "Use Chosen for this field" in the field configuration. This will
-    override the settings made for Chosen itself (for example "Minimum number of
-    options").
+  - Apart from that you can select whether to use chosen on a per-field base by
+    setting the option "Output this field with Chosen" in the field
+    configuration.
+    - "let chosen decide"
+      The field is modified by Chosen if it matches the Chosen configuration.
+    - "always"
+      The field is always modified by Chosen.
+    - "never"
+      The field is not modified by Chosen even if it matches the Chosen
+      configuration.
 
 
 -- CONTACT --

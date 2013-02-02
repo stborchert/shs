@@ -366,7 +366,8 @@
       // Get element selector from settings (and remove "visible" option since
       // our select element is hidden by default).
       var selector = Drupal.settings.chosen.selector.replace(/:visible/, '');
-      if (settings.settings.use_chosen || ($element.is(selector)) && $element.find('option').size() >= Drupal.settings.chosen.minimum) {
+
+      if ((settings.settings.use_chosen == 'always') || ((settings.settings.use_chosen == 'chosen') && ($element.is(selector) && $element.find('option').size() >= Drupal.settings.chosen.minimum))) {
         $element.css({
           width : ($element.width() < minWidth) ? minWidth : $element.width()
         }).chosen(options);

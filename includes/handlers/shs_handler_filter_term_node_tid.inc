@@ -16,6 +16,7 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
     $options = parent::option_definition();
 
     $options['type'] = array('default' => 'shs');
+    $options['use_chosen'] = array('default' => 'never');
 
     return $options;
   }
@@ -26,6 +27,21 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
     $form['type']['#options'] += array(
       'shs' => t('Simple hierarchical select'),
     );
+
+    if (module_exists('chosen')) {
+      $form['use_chosen'] = array(
+        '#type' => 'select',
+        '#title' => t('Output this field with !chosen', array('!chosen' => l(t('Chosen'), 'http://drupal.org/project/chosen'))),
+        '#description' => t('Select in which cases the element will use the !chosen module for the term selection of each level.', array('!chosen' => l(t('Chosen'), 'http://drupal.org/project/chosen'))),
+        '#default_value' => empty($this->options['use_chosen']) ? 'never' : $this->options['use_chosen'],
+        '#dependency' => array('radio:options[type]' => array('shs')),
+        '#options' => array(
+          'chosen' => t('let chosen decide'),
+          'always' => t('always'),
+          'never' => t('never'),
+        ),
+      );
+    }
   }
 
   function value_form(&$form, &$form_state) {
@@ -62,6 +78,18 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
       // Add fake item for next level.
       $parents[] = array('tid' => 0);
 
+      $element_settings = array(
+        'create_new_terms' => FALSE,
+        'create_new_levels' => FALSE,
+        'required' => FALSE,
+      );
+      if (module_exists('chosen') && !empty($this->options['use_chosen'])) {
+        $element_settings['use_chosen'] = $this->options['use_chosen'];
+      }
+      if (!empty($this->options['exposes']) && !empty($this->options['expose']['require'])) {
+        $element_settings['required'] = TRUE;
+      }
+
       // Generate a random hash to avoid merging of settings by drupal_add_js.
       // This is necessary until http://drupal.org/node/208611 lands for D7.
       $js_hash = _shs_create_hash();
@@ -71,7 +99,7 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
           $js_hash => array(
             $identifier => array(
               'vid' => $vocabulary->vid,
-              'settings' => array(),
+              'settings' => $element_settings,
               'default_value' => $default_value,
               'parents' => $parents,
             ),
