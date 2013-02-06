@@ -48,7 +48,16 @@
               // Use current term id as parent id for the next level.
               parent_id = parent.tid;
             });
+            var addNextLevel = false;
             if ((level > 1 || parent_id) && (fieldSettings.settings.create_new_terms && fieldSettings.settings.create_new_levels)) {
+              // Add next level in hierarchy if new levels may be created.
+              addNextLevel = true;
+            }
+            if (fieldSettings.settings.required && parent_id) {
+              // Add next level if field is required.
+              addNextLevel = true;
+            }
+            if (addNextLevel) {
               // Try to add one additional level.
               $select = shsElementCreate($field.attr('id'), fieldSettings, level);
               $select.appendTo($field.parent());
