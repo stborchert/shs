@@ -316,7 +316,7 @@ function shs_field_widget_afterbuild($element, &$form_state) {
 
   // Create Javascript settings for the element only if it hasn't been added
   // before.
-  if (empty($js_added[$js_hash][$element['#name']])) {
+  if (empty($js_added[$element['#name']][$js_hash])) {
     $element_value = $element['#default_value']['tid'];
 
     if (empty($element_value)) {
@@ -334,8 +334,8 @@ function shs_field_widget_afterbuild($element, &$form_state) {
     // Create settings needed for our js magic.
     $settings_js = array(
       'shs' => array(
-        $js_hash => array(
-          "{$element['#name']}" => array(
+        "{$element['#name']}" => array(
+          $js_hash => array(
             'vid' => $element['#shs_vocabulary']->vid,
             'settings' => $element['#shs_settings'],
             'default_value' => $element['#default_value'],
@@ -348,10 +348,10 @@ function shs_field_widget_afterbuild($element, &$form_state) {
     // Add settings.
     drupal_add_js($settings_js, 'setting');
 
-    if (empty($js_added[$js_hash])) {
-      $js_added[$js_hash] = array();
+    if (empty($js_added[$element['#name']])) {
+      $js_added[$element['#name']] = array();
     }
-    $js_added[$js_hash][$element['#name']] = TRUE;
+    $js_added[$element['#name']][$js_hash] = TRUE;
   }
 
   return $element;

@@ -96,8 +96,8 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
       // Create settings needed for our js magic.
       $settings_js = array(
         'shs' => array(
-          $js_hash => array(
-            $identifier => array(
+          $identifier => array(
+            $js_hash => array(
               'vid' => $vocabulary->vid,
               'settings' => $element_settings,
               'default_value' => $default_value,

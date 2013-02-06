@@ -21,39 +21,39 @@
           var $field = $(this);
           var fieldName = $(this).attr('name');
 
-          var settings_shs = {};
-          // Since we store the field settings within an associative array with
-          // random strings as keys (reason: http://drupal.org/node/208611) we
-          // need to get the last setting.
-          $.each(settings.shs, function(hash, setting) {
-            settings_shs = setting;
-          });
-          if (fieldName in settings_shs) {
+          if (fieldName in settings.shs) {
+            var fieldSettings = {};
+            // Since we store the field settings within an associative array with
+            // random strings as keys (reason: http://drupal.org/node/208611) we
+            // need to get the last setting for this field.
+            $.each(settings.shs[fieldName], function(hash, setting) {
+              fieldSettings = setting;
+            });
             var level = 0;
             var parent_id = 0;
             // Update class of wrapper element.
             $field.parent('.form-item').not('.shs-wrapper-processed').once('shs-wrapper');
             // Create elements for each parent of the current value.
-            $.each(settings_shs[fieldName].parents, function(index, parent) {
+            $.each(fieldSettings.parents, function(index, parent) {
               level++;
               // Create select element.
-              $select = shsElementCreate($field.attr('id'), settings_shs[fieldName], level);
+              $select = shsElementCreate($field.attr('id'), fieldSettings, level);
               if ($field.hasClass('error')) {
                 // Add error-class if there was an error with the original field.
                 $select.addClass('error');
               }
               $select.appendTo($field.parent());
               // Retrieve data for this level.
-              getTermChildren($select, settings_shs[fieldName], parent_id, parent.tid);
+              getTermChildren($select, fieldSettings, parent_id, parent.tid);
               // Use current term id as parent id for the next level.
               parent_id = parent.tid;
             });
-            if ((level > 1 || parent_id) && (settings_shs[fieldName].settings.create_new_terms && settings_shs[fieldName].settings.create_new_levels)) {
+            if ((level > 1 || parent_id) && (fieldSettings.settings.create_new_terms && fieldSettings.settings.create_new_levels)) {
               // Try to add one additional level.
-              $select = shsElementCreate($field.attr('id'), settings_shs[fieldName], level);
+              $select = shsElementCreate($field.attr('id'), fieldSettings, level);
               $select.appendTo($field.parent());
               // Retrieve data for this level.
-              getTermChildren($select, settings_shs[fieldName], parent_id, 0);
+              getTermChildren($select, fieldSettings, parent_id, 0);
             }
           }
         });
