@@ -276,7 +276,8 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
     '#attributes' => array(
       'class' => array('shs-enabled'),
     ),
-    '#maxlength' => NULL, // Prevent errors with drupal_strlen().
+    // Prevent errors with drupal_strlen().
+    '#maxlength' => NULL,
     '#element_validate' => array('shs_field_widget_validate'),
     '#after_build' => array('shs_field_widget_afterbuild'),
     '#shs_settings' => $instance['widget']['settings']['shs'],

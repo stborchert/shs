@@ -53,8 +53,7 @@
               // Add next level in hierarchy if new levels may be created.
               addNextLevel = true;
             }
-            if (fieldSettings.settings.required && parent_id) {
-              // Add next level if field is required.
+            if (fieldSettings.default_value && (fieldSettings.default_value.tid == parent_id)) {
               addNextLevel = true;
             }
             if (addNextLevel) {
@@ -318,6 +317,7 @@
    *   The new (empty) <select> element.
    */
   shsElementCreate = function(base_id, settings, level) {
+    // Create element and initially hide it.
     $element = $('<select>')
       .attr('id', base_id + '-select-' + level)
       .addClass('shs-select')
@@ -325,7 +325,7 @@
       .bind('change', function() {
         updateElements($(this), base_id, settings, level);
       })
-      .hide(); // Initially hide the element.
+      .hide();
     // Return the new element.
     return $element;
   }
