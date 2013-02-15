@@ -265,7 +265,8 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
     $options = shs_term_get_children($vocabulary->vid, 0);
     if (count($options)) {
       // Set element value to first available option.
-      $element_value = reset(array_keys($options));
+      $option_keys = array_keys($options);
+      $element_value = reset($option_keys);
     }
   }
 
