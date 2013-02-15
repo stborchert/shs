@@ -99,7 +99,7 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
       if (module_exists('chosen') && !empty($this->options['use_chosen'])) {
         $element_settings['use_chosen'] = $this->options['use_chosen'];
       }
-      if (!empty($this->options['exposes']) && !empty($this->options['expose']['require'])) {
+      if (!empty($this->options['exposed']) && !empty($this->options['expose']['required'])) {
         $element_settings['required'] = TRUE;
       }
 
