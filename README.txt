@@ -37,7 +37,9 @@ Taxonomy module (Drupal core) needs to be enabled.
     Force users to select terms from the deepest level.
 
 * Views (exposed filter)
-  - add a new filter using the field set-up as "Simple hierarchical select"
+  - add a new filter using the field set-up as "Simple hierarchical select" or
+    use "Content: Has taxonomy terms (with depth; Simple hierarchical select)"
+    as a new filter
   - use "Simple hierarchical select" as selection type
   - select "Expose this filter to visitors, to allow them to change it"
   - enjoy :)
