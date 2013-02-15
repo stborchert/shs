@@ -21,6 +21,19 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
     return $options;
   }
 
+  /**
+   * Override options form to disable multiple selection.
+   */
+  function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+    if (isset($form['expose']['multiple'])) {
+      // Hide element and set default to FALSE.
+      $form['expose']['multiple']['#default_value'] = FALSE;
+      $form['expose']['multiple']['#value'] = FALSE;
+      $form['expose']['multiple']['#access'] = FALSE;
+    }
+  }
+
   function extra_options_form(&$form, &$form_state) {
     parent::extra_options_form($form, $form_state);
 
