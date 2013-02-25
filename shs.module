@@ -37,11 +37,11 @@ function shs_json() {
     $_callback = check_plain($_POST['callback']);
     // Is this a valid callback?
     $valid_callbacks = shs_json_callbacks();
-    if (isset($valid_callbacks[$_callback]) && function_exists($_callback)) {
+    if (isset($valid_callbacks[$_callback]) && !empty($valid_callbacks[$_callback]['callback']) && function_exists($valid_callbacks[$_callback]['callback'])) {
       // Get arguments and validate them.
       $post_args = (isset($_POST['arguments']) && is_array($_POST['arguments'])) ? $_POST['arguments'] : array();
       $arguments = _shs_json_callback_get_arguments($valid_callbacks[$_callback], $post_args);
-      if (($callback_result = call_user_func_array($_callback, $arguments)) !== FALSE) {
+      if (($callback_result = call_user_func_array($valid_callbacks[$_callback]['callback'], $arguments)) !== FALSE) {
         $result['success'] = TRUE;
         $result['data'] = $callback_result;
       }
@@ -57,12 +57,14 @@ function shs_json() {
  * @return <array>
  *   List of valid callbacks with the following structure:
  *   - [name of callback]
+ *     - 'callback': function to call
  *     - 'arguments'
  *       - [name of argument]: [validation function] (FALSE for no validation)
  */
 function shs_json_callbacks() {
   $callbacks = array(
     'shs_json_term_get_children' => array(
+      'callback' => 'shs_json_term_get_children',
       'arguments' => array(
         'vid' => 'is_numeric',
         'parent' => 'is_numeric',
@@ -70,6 +72,7 @@ function shs_json_callbacks() {
       ),
     ),
     'shs_json_term_add' => array(
+      'callback' => 'shs_json_term_add',
       'arguments' => array(
         'vid' => 'is_numeric',
         'parent' => 'is_numeric',
@@ -573,6 +576,13 @@ function shs_term_get_children($vid, $parent = 0, $settings = array(), $reset = 
       $terms[$vid] = $cache->data;
     }
   }
+  // Allow other module to modify the list of terms.
+  $alter_options = array(
+    'vid' => $vid,
+    'parent' => $parent,
+    'settings' => $settings,
+  );
+  drupal_alter('shs_term_get_children', $terms, $alter_options);
 
   return empty($terms[$vid][$parent][$node_count]) ? array() : $terms[$vid][$parent][$node_count];
 }
