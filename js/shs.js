@@ -103,7 +103,7 @@
             var options = $element.attr('options');
           }
 
-          if (data.data.length == 0 && !(settings.settings.create_new_terms && settings.settings.create_new_levels)) {
+          if (data.data.length == 0 && !(settings.settings.create_new_terms && (settings.settings.create_new_levels || (parent_value + default_value == 0)))) {
             // Remove element.
             $element.remove();
             return;
