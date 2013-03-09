@@ -44,7 +44,7 @@
               }
               $select.appendTo($field.parent());
               // Retrieve data for this level.
-              getTermChildren($select, fieldSettings, parent_id, parent.tid);
+              getTermChildren($select, fieldSettings, parent_id, parent.tid, $field.attr('id'));
               // Use current term id as parent id for the next level.
               parent_id = parent.tid;
             });
@@ -61,7 +61,7 @@
               $select = shsElementCreate($field.attr('id'), fieldSettings, level);
               $select.appendTo($field.parent());
               // Retrieve data for this level.
-              getTermChildren($select, fieldSettings, parent_id, 0);
+              getTermChildren($select, fieldSettings, parent_id, 0, $field.attr('id'));
             }
           }
         });
@@ -79,8 +79,10 @@
    *   Value which has been selected in the parent element (== "selected term").
    * @param default_value
    *   Value to use as default.
+   * @param base_id
+   *   ID of original field which is rewritten as "taxonomy_shs".
    */
-  getTermChildren = function($element, settings, parent_value, default_value) {
+  getTermChildren = function($element, settings, parent_value, default_value, base_id) {
     $.ajax({
       url: Drupal.settings.basePath + 'shs/json',
       type: 'POST',
@@ -134,6 +136,12 @@
             // Display original dropdown element.
             $element.fadeIn();
             $element.css('display','inline-block');
+          }
+
+          // If there is no data, the field is required and the user is allowed
+          // to add new terms, trigger click on "Add new".
+          if (data.data.length == 0 && settings.settings.required && settings.settings.create_new_terms && (settings.settings.create_new_levels || (parent_value + default_value == 0))) {
+            updateElements($element, base_id, settings, 1);
           }
         }
       },
@@ -263,6 +271,12 @@
           $triggering_element.css('display','inline-block');
         });
       $cancel.appendTo($buttons);
+      if (level == 1 && settings.settings.required && $('option', $triggering_element).length == 1) {
+        // Hide cancel button since the term selection is empty (apart from
+        // "Add new term") and the field is required.
+        $cancel.hide();
+      }
+
       $save = $('<a>')
         .attr('href', '#')
         .html(Drupal.t('Save'))
@@ -296,7 +310,7 @@
       $element_new = shsElementCreate(base_id, settings, level);
       $element_new.appendTo($triggering_element.parent());
       // Retrieve list of items for the new element.
-      getTermChildren($element_new, settings, $triggering_element.val(), 0);
+      getTermChildren($element_new, settings, $triggering_element.val(), 0, base_id);
     }
 
     // Set value of original field.
