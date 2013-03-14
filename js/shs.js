@@ -335,6 +335,8 @@
     $element = $('<select>')
       .attr('id', base_id + '-select-' + level)
       .addClass('shs-select')
+      // Add core class to apply default styles to the element.
+      .addClass('form-select')
       .addClass('shs-select-level-' + level)
       .bind('change', function() {
         updateElements($(this), base_id, settings, level);
