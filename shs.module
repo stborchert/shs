@@ -256,6 +256,11 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
     return array();
   }
 
+  // Check if term exists (may be deleted).
+  if ($element_value && (($term = taxonomy_term_load($element_value)) === FALSE)) {
+    $element_value = 0;
+  }
+
   if (!user_access('edit terms in ' . $vocabulary->vid)) {
     // Update setting based on permission.
     $instance['widget']['settings']['shs']['create_new_terms'] = FALSE;
