@@ -12,8 +12,8 @@ function shs_menu() {
   $items = array();
 
   // Create menu item for JSON callbacks.
-  $items['shs/json'] = array(
-    'title' => 'JSON',
+  $items['js/shs'] = array(
+    'title' => 'JSON callback',
     'description' => 'JSON callbacks for Simple hierarchical select',
     'page callback' => 'shs_json',
     'access callback' => 'user_access',
@@ -22,6 +22,20 @@ function shs_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Implements hook_js().
+ */
+function shs_js() {
+  return array(
+    'json' => array(
+      'callback' => 'shs_json',
+      'access callback'  => 'user_access',
+      'access arguments' => array('access content'),
+      'dependencies' => array('taxonomy'),
+    ),
+  );
 }
 
 /**

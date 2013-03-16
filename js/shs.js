@@ -84,7 +84,7 @@
    */
   getTermChildren = function($element, settings, parent_value, default_value, base_id) {
     $.ajax({
-      url: Drupal.settings.basePath + 'shs/json',
+      url: Drupal.settings.basePath + 'js/shs/json',
       type: 'POST',
       dataType: 'json',
       cache: true,
@@ -166,7 +166,7 @@
    */
   termAddNew = function($triggering_element, $container, term, base_id, level) {
     $.ajax({
-      url: Drupal.settings.basePath + 'shs/json',
+      url: Drupal.settings.basePath + 'js/shs/json',
       type: 'POST',
       dataType: 'json',
       cache: true,

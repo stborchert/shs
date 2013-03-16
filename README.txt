@@ -66,6 +66,13 @@ Taxonomy module (Drupal core) needs to be enabled.
       The field is not modified by Chosen even if it matches the Chosen
       configuration.
 
+* High-performance JavaScript callback handler (http://drupal.org/project/js)
+  - If you have lots of terms and a huge hierarchy you could increase the
+    performance of "Simple hierarchical select" by installing "JS". It routes
+    all javascript callbacks needed by "Simple hierarchical select" through a
+    custom handler to avoid loading of all Drupal functions and speed up
+    loading.
+
 
 -- CONTACT --
 
