@@ -41,19 +41,33 @@ class shs_handler_filter_term_node_tid_depth extends shs_handler_filter_term_nod
   }
 
   function query() {
-    // If no filter values are present, then do nothing.
-    if (count($this->value) == 0) {
-      return;
-    }
-    elseif (count($this->value) == 1) {
-      // $this->value is an array with a single element so convert it.
-      if (is_array($this->value)) {
-        $this->value = current($this->value);
+    // Check if multiple select allowed.
+    if ($this->options['expose']['multiple']) {
+      // If no filter values are present, then do nothing.
+      if ($this->value == 'All') {
+        return;
       }
-      $operator = '=';
+      else {
+        $this->value = explode('+', $this->value[0]);
+        $this->value = explode(',', end($this->value));
+        $operator = 'IN';
+      }
     }
     else {
-      $operator = 'IN';
+      // If no filter values are present, then do nothing.
+      if (count($this->value) == 0) {
+        return;
+      }
+      elseif (count($this->value) == 1) {
+        // $this->value is an array with a single element so convert it.
+        if (is_array($this->value)) {
+          $this->value = current($this->value);
+        }
+        $operator = '=';
+      }
+      else {
+        $operator = 'IN';
+      }
     }
 
     // The normal use of ensure_my_table() here breaks Views.

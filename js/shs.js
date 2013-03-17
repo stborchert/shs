@@ -46,7 +46,12 @@
               // Retrieve data for this level.
               getTermChildren($select, fieldSettings, parent_id, parent.tid, $field.attr('id'));
               // Use current term id as parent id for the next level.
-              parent_id = parent.tid;
+              if (fieldSettings.multiple) {
+                parent_id = parent['tid'];
+              }
+              else {
+                parent_id = parent.tid;
+              }
             });
             var addNextLevel = false;
             if ((level > 1 || parent_id) && (fieldSettings.settings.create_new_terms && fieldSettings.settings.create_new_levels)) {
@@ -76,13 +81,28 @@
    * @param settings
    *   Field settings.
    * @param parent_value
-   *   Value which has been selected in the parent element (== "selected term").
-   * @param default_value
-   *   Value to use as default.
-   * @param base_id
-   *   ID of original field which is rewritten as "taxonomy_shs".
-   */
+    *   Value which has been selected in the parent element (== "selected term").
+    * @param default_value
+    *   Value to use as default.
+    * @param base_id
+    *   ID of original field which is rewritten as "taxonomy_shs".
+    */
   getTermChildren = function($element, settings, parent_value, default_value, base_id) {
+
+    // Check if parent_value is number and convert it.
+    if (!$.isArray(parent_value) && typeof parent_value != "object") {
+      parent_value = [parent_value];
+    }
+
+    // Check if default_value is object and convert it.
+    if (!$.isArray(default_value) && typeof default_value == "object") {
+      var arr = new Array;
+      $.each(default_value, function(delta, value){
+        arr.push(value);
+      });
+      default_value = arr;
+    }
+
     $.ajax({
       url: Drupal.settings.basePath + 'js/shs/json',
       type: 'POST',
@@ -113,9 +133,9 @@
 
           // Remove all existing options.
           $('option', $element).remove();
-          // Add empty option (if field is not required or this is not the
-          // first level).
-          if (!settings.settings.required || (settings.settings.required && parent_value != 0)) {
+          // Add empty option (if field is not required and not multiple
+          // or this is not the first level and not multiple).
+          if (!settings.settings.required || (settings.settings.required && parent_value != 0 && !settings.multiple)) {
             options[options.length] = new Option(Drupal.t('- None -'), 0);
           }
 
@@ -314,7 +334,7 @@
     }
 
     // Set value of original field.
-    updateFieldValue($triggering_element, base_id, level);
+    updateFieldValue($triggering_element, base_id, level, settings.multiple);
   }
 
   /**
@@ -332,16 +352,31 @@
    */
   shsElementCreate = function(base_id, settings, level) {
     // Create element and initially hide it.
-    $element = $('<select>')
-      .attr('id', base_id + '-select-' + level)
-      .addClass('shs-select')
-      // Add core class to apply default styles to the element.
-      .addClass('form-select')
-      .addClass('shs-select-level-' + level)
-      .bind('change', function() {
-        updateElements($(this), base_id, settings, level);
-      })
-      .hide();
+    if (settings.multiple) {
+      $element = $('<select>')
+        .attr('id', base_id + '-select-' + level)
+        .attr('multiple', 'multiple')
+        .addClass('shs-select')
+        // Add core class to apply default styles to the element.
+        .addClass('form-select')
+        .addClass('shs-select-level-' + level)
+        .bind('change', function() {
+          updateElements($(this), base_id, settings, level);
+        })
+        .hide();
+    }
+    else {
+      $element = $('<select>')
+        .attr('id', base_id + '-select-' + level)
+        .addClass('shs-select')
+        // Add core class to apply default styles to the element.
+        .addClass('form-select')
+        .addClass('shs-select-level-' + level)
+        .bind('change', function() {
+          updateElements($(this), base_id, settings, level);
+        })
+        .hide();
+    }
     // Return the new element.
     return $element;
   }
@@ -356,7 +391,7 @@
    * @param level
    *   Current level in hierarchy.
    */
-  updateFieldValue = function($triggering_element, base_id, level) {
+  updateFieldValue = function($triggering_element, base_id, level, multiple) {
     // Reset value of original field.
     $field_orig = $('#' + base_id);
     $field_orig.val(0);
@@ -368,8 +403,27 @@
       }
     }
     else {
+      var new_val = $triggering_element.val();
+      if (level > 1 && multiple) {
+        var new_value = '';
+        for (i = 0; i < level - 1; i++) {
+          var prev_value = $('.shs-select:eq(' + i + ')').val();
+          if (i == 0) {
+            new_value = prev_value;
+          }
+          else {
+            new_value = new_value + '+' + prev_value;
+          }
+        }
+        new_val = new_value;
+      }
       // Use value from current field.
-      $field_orig.val($triggering_element.val());
+      if ($.isArray(new_val)) {
+        $field_orig.val(new_val.join(','));
+      }
+      else {
+        $field_orig.val(new_val);
+      }
     }
   }
 

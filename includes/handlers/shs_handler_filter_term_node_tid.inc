@@ -21,19 +21,6 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
     return $options;
   }
 
-  /**
-   * Override options form to disable multiple selection.
-   */
-  function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
-    if (isset($form['expose']['multiple'])) {
-      // Hide element and set default to FALSE.
-      $form['expose']['multiple']['#default_value'] = FALSE;
-      $form['expose']['multiple']['#value'] = FALSE;
-      $form['expose']['multiple']['#access'] = FALSE;
-    }
-  }
-
   function extra_options_form(&$form, &$form_state) {
     parent::extra_options_form($form, $form_state);
 
@@ -60,6 +47,7 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
   function value_form(&$form, &$form_state) {
     parent::value_form($form, $form_state);
 
+    $multiple = $this->options['expose']['multiple'];
     $vocabulary = taxonomy_vocabulary_machine_name_load($this->options['vocabulary']);
     if (empty($vocabulary) && $this->options['limit']) {
       $form['markup'] = array(
@@ -73,21 +61,38 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
 
       // Get parents of selected term.
       $default_value = empty($this->value) ? 0 : $this->value;
+
       if (!empty($form_state['input'][$identifier])) {
         $default_value = $form_state['input'][$identifier];
+        if (!is_array($default_value) && $multiple) {
+          $default_value = explode('+', $default_value);
+          foreach ($default_value as $delta => $value) {
+            $default_value[$delta] = explode(',', $value);
+          }
+        }
       }
 
       $parents = array();
       if (!empty($default_value) && $default_value != 'All') {
-        $term_parents = taxonomy_get_parents_all($default_value);
-        // Remove selected term from list.
-        array_shift($term_parents);
-        foreach (array_reverse($term_parents) as $term) {
-          $parents[] = array('tid' => $term->tid);
+        if (is_array($default_value) && $default_value[0] != 'All') {
+          foreach ($default_value as $delta => $level) {
+            foreach ($level as $tid) {
+              $parents[$delta]['tid'] = $level;
+            }
+          }
         }
-        // Add current term (name not needed).
-        $parents[] = array('tid' => $default_value);
+        elseif (is_string($default_value)) {
+          $term_parents = taxonomy_get_parents_all($default_value);
+          // Remove selected term from list.
+          array_shift($term_parents);
+          foreach (array_reverse($term_parents) as $term) {
+            $parents[] = array('tid' => $term->tid);
+          }
+          // Add current term (name not needed).
+          $parents[] = array('tid' => $default_value);
+        }
       }
+
       // Add fake item for next level.
       $parents[] = array('tid' => 0);
 
@@ -115,6 +120,7 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
               'settings' => $element_settings,
               'default_value' => $default_value,
               'parents' => $parents,
+              'multiple' => $multiple,
             ),
           ),
         ),
@@ -124,16 +130,28 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
       // Add behavior.
       drupal_add_js(drupal_get_path('module', 'shs') . '/js/shs.js');
 
+      if (is_array($default_value) && $multiple && $default_value[0] != 'All') {
+        foreach ($default_value as $delta => $level) {
+          if ($delta == 0) {
+            $default_value_str = implode(',', $level);
+          }
+          else {
+            $default_value_str .= '+' . implode(',', $level);
+          }
+        }
+      }
+
+      // Rewrite default select to textfield.
       $form['value'] = array(
         '#type' => 'textfield',
-        '#default_value' => empty($default_value) ? 'All' : $default_value,
+        '#default_value' => empty($default_value_str) ? 'All' : $default_value_str,
         '#attributes' => array(
           'class' => array('element-invisible', 'shs-enabled'),
         ),
       );
 
-      if (!empty($form_state['exposed']) && isset($identifier) && empty($form_state['input'][$identifier])) {
-        $form_state['input'][$identifier] = empty($default_value) ? 'All' : $default_value;
+      if (!empty($form_state['exposed']) && isset($identifier) && empty($form_state['input'][$identifier]) || $multiple && isset($form_state['input'][$identifier][0])) {
+        $form_state['input'][$identifier] = empty($default_value_str) ? 'All' : $default_value_str;
       }
     }
 

@@ -81,7 +81,7 @@ function shs_json_callbacks() {
       'callback' => 'shs_json_term_get_children',
       'arguments' => array(
         'vid' => 'is_numeric',
-        'parent' => 'is_numeric',
+        'parent' => 'is_array',
         'settings' => 'is_array',
       ),
     ),
@@ -621,16 +621,20 @@ function shs_term_get_children($vid, $parent = 0, $settings = array(), $reset = 
  *
  * @see shs_term_get_children()
  */
-function shs_json_term_get_children($vid, $parent = 0, $settings = array()) {
-  $result = array();
-  $terms = shs_term_get_children($vid, $parent, $settings);
+function shs_json_term_get_children($vid, $parent = array(), $settings = array()) {
+  $scope = $result = array();
+  foreach ($parent as $tid) {
+    $scope[] = shs_term_get_children($vid, $tid, $settings);
+  }
 
   // Rewrite result set to preserve original sort of terms through JSON request.
-  foreach ($terms as $tid => $label) {
-    $result[] = array(
-      'tid' => $tid,
-      'label' => $label,
-    );
+  foreach ($scope as $terms) {
+    foreach ($terms as $tid => $label) {
+      $result[] = array(
+        'tid' => $tid,
+        'label' => $label,
+      );
+    }
   }
 
   return $result;
