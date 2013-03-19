@@ -611,8 +611,8 @@ function shs_term_get_children($vid, $parent = 0, $settings = array(), $reset = 
  *
  * @param <int> $vid
  *   ID of vocabulary the term is associated to.
- * @param <int> $parent
- *   ID of parent term.
+ * @param <array> $parent
+ *   List of parent terms.
  * @param <array> $settings
  *   Additional settings (for example "display node count").
  *
