@@ -33,6 +33,7 @@ function shs_js() {
       'callback' => 'shs_json',
       'access callback'  => 'user_access',
       'access arguments' => array('access content'),
+      'includes' => array('path'),
       'dependencies' => array('taxonomy'),
     ),
   );
