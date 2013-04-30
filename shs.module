@@ -282,10 +282,14 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
   }
   $instance['widget']['settings']['shs']['required'] = $element['#required'];
 
+  // Prepare the list of options.
+  $properties = _options_properties('select', FALSE, $element['#required'], !empty($element_value));
+  $options = _options_get_options($field, $instance, $properties, $element['#entity_type'], $element['#entity']);
   // Create element.
   $element += array(
-    '#type' => 'textfield',
+    '#type' => 'select',
     '#default_value' => empty($element_value) ? NULL : $element_value,
+    '#options' => $options,
     '#attributes' => array(
       'class' => array('shs-enabled'),
     ),

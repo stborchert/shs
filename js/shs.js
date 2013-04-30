@@ -13,8 +13,7 @@
     // Default function to attach the behavior.
     attach: function (context, settings) {
       var self = this;
-      $('input.shs-enabled')
-        .not('.shs-processed')
+      $('select.shs-enabled')
         .once('shs')
         .addClass('element-invisible')
         .each(function() {
@@ -115,7 +114,7 @@
             var options = $element.attr('options');
           }
 
-          if (data.data.length == 0 && !(settings.settings.create_new_terms && (settings.settings.create_new_levels || (parent_value[0] + default_value == 0)))) {
+          if (data.data.length == 0 && !(settings.settings.create_new_terms && (settings.settings.create_new_levels || (parent_value[0] == settings.any_value && default_value == 0)))) {
             // Remove element.
             $element.remove();
             return;
@@ -150,7 +149,7 @@
 
           // If there is no data, the field is required and the user is allowed
           // to add new terms, trigger click on "Add new".
-          if (data.data.length == 0 && settings.settings.required && settings.settings.create_new_terms && (settings.settings.create_new_levels || (parent_value[0] + default_value == 0))) {
+          if (data.data.length == 0 && settings.settings.required && settings.settings.create_new_terms && (settings.settings.create_new_levels || (parent_value[0] == settings.any_value && default_value == 0))) {
             updateElements($element, base_id, settings, 1);
           }
         }
@@ -299,7 +298,7 @@
           // Create a term object.
           var term = {
             vid: settings.vid,
-            parent: $triggering_element.prev('select').val() || 0,
+            parent: (level == 1) ? 0 : ($triggering_element.prev('select').val() || 0),
             name: termName
           };
           if (termName.length > 0) {
@@ -317,7 +316,7 @@
         });
       $save.appendTo($buttons);
     }
-    else if ($triggering_element.val() != 0) {
+    else if ($triggering_element.val() != 0 && $triggering_element.val() != settings.any_value) {
       level++;
       $element_new = shsElementCreate(base_id, settings, level);
       $element_new.appendTo($triggering_element.parent());
