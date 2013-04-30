@@ -78,9 +78,7 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
       if (!empty($default_value) && $default_value != 'All') {
         if (is_array($default_value) && $default_value[0] != 'All') {
           foreach ($default_value as $delta => $level) {
-            foreach ($level as $tid) {
-              $parents[$delta]['tid'] = $level;
-            }
+            $parents[$delta]['tid'] = $level;
           }
         }
         elseif (is_string($default_value)) {

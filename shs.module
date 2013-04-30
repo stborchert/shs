@@ -282,17 +282,6 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
   }
   $instance['widget']['settings']['shs']['required'] = $element['#required'];
 
-  // Element is required and there is no initial value.
-  if (empty($element_value) && $element['#required']) {
-    // Load list of options.
-    $options = shs_term_get_children($vocabulary->vid, 0);
-    if (count($options)) {
-      // Set element value to first available option.
-      $option_keys = array_keys($options);
-      $element_value = reset($option_keys);
-    }
-  }
-
   // Create element.
   $element += array(
     '#type' => 'textfield',
@@ -401,10 +390,12 @@ function shs_field_widget_validate($element, &$form_state, $form) {
   // Do we want to force the user to select terms from the deepest level?
   $force_deepest_level = empty($settings['force_deepest']) ? FALSE : $settings['force_deepest'];
   $value = empty($element['#value']) ? '_none' : $element['#value'];
-  if ($element['#required'] && $value == '_none') {
-    form_error($element, t('!name field is required.', array('!name' => $element['#title'])));
+  if ($value == '_none') {
     unset($element['#value']);
     unset($form_state['values'][$field_name][$field_language][$element['#delta']]);
+  }
+  if ($element['#required'] && $value == '_none') {
+    form_error($element, t('!name field is required.', array('!name' => $element['#title'])));
     return;
   }
   if ($force_deepest_level && $value) {
