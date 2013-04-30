@@ -415,7 +415,21 @@
         $field_orig.val(new_val.join(','));
       }
       else {
-        $field_orig.val(new_val);
+        if ($field_orig.children('option[value="' + new_val + '"]').length > 0) {
+          // Value exists.
+          $field_orig.val(new_val);
+        }
+        else {
+          // We need to append the new option.
+          if ($field_orig.prop) {
+            var options = $field_orig.prop('options');
+          }
+          else {
+            var options = $field_orig.attr('options');
+          }
+          options[options.length] = new Option(new_val, new_val);
+          $field_orig.val(new_val);
+        }
       }
     }
   }
