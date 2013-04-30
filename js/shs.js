@@ -249,6 +249,11 @@
     if ($triggering_element.val() == '_add_new_') {
       // Hide element.
       $triggering_element.hide();
+      if (Drupal.settings.chosen) {
+        // Remove element created by chosen.
+        var elem_id = $triggering_element.attr('id');
+        $('#' + elem_id.replace(/-/g, '_') + '_chzn').remove();
+      }
       // Create new container with textfield and buttons ("cancel", "save").
       $container = $('<div>')
         .addClass('shs-term-add-new-wrapper')
@@ -276,10 +281,13 @@
           // Remove container.
           $container.remove();
           // Reset value of triggering element.
-          $triggering_element.val(0);
-          // Display triggering element.
-          $triggering_element.fadeIn();
-          $triggering_element.css('display','inline-block');
+          $triggering_element.val(settings.settings.any_value);
+
+          if (!elementConvertToChosen($triggering_element, settings)) {
+            // Display triggering element.
+            $triggering_element.fadeIn();
+            $triggering_element.css('display','inline-block');
+          }
         });
       $cancel.appendTo($buttons);
       if (level == 1 && settings.settings.required && $('option', $triggering_element).length == 1) {
@@ -441,6 +449,7 @@
    */
   elementConvertToChosen = function($element, settings) {
     if (Drupal.settings.chosen) {
+      $element.removeClass('chzn-done');
       var minWidth = Drupal.settings.chosen.minimum_width;
       // Define options for chosen.
       var options = {};
