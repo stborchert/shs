@@ -365,6 +365,7 @@ function shs_field_widget_afterbuild($element, &$form_state) {
             'settings' => $element['#shs_settings'],
             'default_value' => $element['#default_value'],
             'parents' => array_reverse($parents),
+            'any_label' => t('- None -'),
           ),
         ),
       ),
