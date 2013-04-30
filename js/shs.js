@@ -135,7 +135,7 @@
           // Add empty option (if field is not required and not multiple
           // or this is not the first level and not multiple).
           if (!settings.settings.required || (settings.settings.required && parent_value != 0 && !settings.multiple)) {
-            options[options.length] = new Option(settings.any_label, 'All');
+            options[options.length] = new Option(settings.any_label, settings.any_value);
           }
 
           if (settings.settings.create_new_terms) {
@@ -182,8 +182,10 @@
    *   ID of original field which is rewritten as "taxonomy_shs".
    * @param level
    *   Current level in hierarchy.
+   * @param settings
+   *   Field settings.
    */
-  termAddNew = function($triggering_element, $container, term, base_id, level) {
+  termAddNew = function($triggering_element, $container, term, base_id, level, settings) {
     $.ajax({
       url: Drupal.settings.basePath + '?q=' + Drupal.settings.pathPrefix + 'js/shs/json',
       type: 'POST',
@@ -211,7 +213,7 @@
           // Set new default value.
           $triggering_element.val(data.data.tid);
           // Set value of original field.
-          updateFieldValue($triggering_element, base_id, level);
+          updateFieldValue($triggering_element, base_id, level, settings);
         }
       },
       error: function(xhr, status, error) {
@@ -310,7 +312,7 @@
             name: termName
           };
           if (termName.length > 0) {
-            termAddNew($triggering_element, $container, term, base_id, level);
+            termAddNew($triggering_element, $container, term, base_id, level, settings);
           }
           else {
             // Remove container.
@@ -333,7 +335,7 @@
     }
 
     // Set value of original field.
-    updateFieldValue($triggering_element, base_id, level, settings.multiple);
+    updateFieldValue($triggering_element, base_id, level, settings);
   }
 
   /**
@@ -389,13 +391,15 @@
    *   ID of original field which is rewritten as "taxonomy_shs".
    * @param level
    *   Current level in hierarchy.
+   * @param settings
+   *   Field settings.
    */
-  updateFieldValue = function($triggering_element, base_id, level, multiple) {
+  updateFieldValue = function($triggering_element, base_id, level, settings) {
     // Reset value of original field.
     $field_orig = $('#' + base_id);
-    $field_orig.val(0);
+    $field_orig.val(settings.any_value);
     // Set original field value.
-    if ($triggering_element.val() == 0 || $triggering_element.val() == '_add_new_') {
+    if ($triggering_element.val() === settings.any_value || $triggering_element.val() == '_add_new_') {
       if ($triggering_element.prev('select').length) {
         // Use value from parent level.
         $field_orig.val($triggering_element.prev('select').val());
@@ -403,7 +407,7 @@
     }
     else {
       var new_val = $triggering_element.val();
-      if (level > 1 && multiple) {
+      if (level > 1 && settings.multiple) {
         var new_value = '';
         for (i = 0; i < level - 1; i++) {
           var prev_value = $('.shs-select:eq(' + i + ')').val();

@@ -365,7 +365,8 @@ function shs_field_widget_afterbuild($element, &$form_state) {
             'settings' => $element['#shs_settings'],
             'default_value' => $element['#default_value'],
             'parents' => array_reverse($parents),
-            'any_label' => t('- None -'),
+            'any_label' => empty($element['#required']) ? t('- None -') : t('- Select a value -'),
+            'any_value' => '_none',
           ),
         ),
       ),
@@ -399,7 +400,13 @@ function shs_field_widget_validate($element, &$form_state, $form) {
 
   // Do we want to force the user to select terms from the deepest level?
   $force_deepest_level = empty($settings['force_deepest']) ? FALSE : $settings['force_deepest'];
-  $value = empty($element['#value']) ? 0 : $element['#value'];
+  $value = empty($element['#value']) ? '_none' : $element['#value'];
+  if ($element['#required'] && $value == '_none') {
+    form_error($element, t('!name field is required.', array('!name' => $element['#title'])));
+    unset($element['#value']);
+    unset($form_state['values'][$field_name][$field_language][$element['#delta']]);
+    return;
+  }
   if ($force_deepest_level && $value) {
     // Get vocabulary.
     $allowed_values = reset($field['field']['settings']['allowed_values']);

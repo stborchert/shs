@@ -125,6 +125,7 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
               'parents' => $parents,
               'multiple' => $multiple,
               'any_label' => variable_get('views_exposed_filter_any_label', 'new_any') == 'old_any' ? t('<Any>') : t('- Any -'),
+              'any_value' => 'All',
             ),
           ),
         ),
