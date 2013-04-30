@@ -88,7 +88,6 @@
     *   ID of original field which is rewritten as "taxonomy_shs".
     */
   getTermChildren = function($element, settings, parent_value, default_value, base_id) {
-
     // Check if parent_value is number and convert it.
     if (!$.isArray(parent_value) && typeof parent_value != "object") {
       parent_value = [parent_value];
@@ -104,7 +103,7 @@
     }
 
     $.ajax({
-      url: Drupal.settings.basePath + '?q=js/shs/json',
+      url: Drupal.settings.basePath + '?q=' + Drupal.settings.pathPrefix + 'js/shs/json',
       type: 'POST',
       dataType: 'json',
       cache: true,
@@ -186,7 +185,7 @@
    */
   termAddNew = function($triggering_element, $container, term, base_id, level) {
     $.ajax({
-      url: Drupal.settings.basePath + 'js/shs/json',
+      url: Drupal.settings.basePath + '?q=' + Drupal.settings.pathPrefix + 'js/shs/json',
       type: 'POST',
       dataType: 'json',
       cache: true,

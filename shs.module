@@ -476,11 +476,20 @@ function shs_field_formatter_prepare_view($entity_type, $entities, $field, $inst
       $parents = taxonomy_get_parents_all($item['tid']);
       // Remove current term from list.
       array_shift($parents);
+      if (module_exists('i18n_taxonomy')) {
+        // Localize terms.
+        $parents = i18n_taxonomy_localize_terms($parents);
+      }
       foreach (array_reverse($parents) as $parent) {
         $items[$entity_id][$delta]['parents'][$parent->tid] = $parent;
       }
       // Load term.
-      $items[$entity_id][$delta]['term'] = taxonomy_term_load($item['tid']);
+      $term_current = taxonomy_term_load($item['tid']);
+      if (module_exists('i18n_taxonomy')) {
+        // Localize current term.
+        $term_current = i18n_taxonomy_localize_terms($term_current);
+      }
+      $items[$entity_id][$delta]['term'] = $term_current;
     }
   }
 }
@@ -545,7 +554,7 @@ function shs_field_formatter_view($entity_type, $entity, $field, $instance, $lan
  * @param <int> $parent
  *   ID of parent term.
  * @param <array> $settings
- *   Additional settings (for example "display node count").
+ *   Additional settings (for example "display node count", "language", etc.,).
  * @param <boolean> $reset
  *   If TRUE, rebuild the cache for the given $vid and $parent.
  *
@@ -553,26 +562,35 @@ function shs_field_formatter_view($entity_type, $entity, $field, $instance, $lan
  *   List of child terms keyed by term id.
  */
 function shs_term_get_children($vid, $parent = 0, $settings = array(), $reset = FALSE) {
+  global $language;
+  $langcode = $language->language;
+  if (empty($settings['language']->language)) {
+    $settings['language'] = $language;
+  }
+  else {
+    $langcode = $settings['language']->language;
+  }
+
   $terms = &drupal_static(__FUNCTION__, array());
   $node_count = !empty($settings['node_count']) && variable_get('taxonomy_maintain_index_table', TRUE);
 
-  if ($reset || ($vid && empty($terms[$vid][$parent][$node_count]))) {
+  if ($reset || ($vid && empty($terms[$vid][$langcode][$parent][$node_count]))) {
     // Initialize list.
-    $terms[$vid][$parent] = array(
+    $terms[$vid][$langcode][$parent] = array(
       0 => array(),
       1 => array(),
     );
     $cache_key = "shs:{$vid}";
     // Get cached values.
     $cache = cache_get($cache_key);
-    if ($reset || !$cache || ($cache->expire && time() > $cache->expire) || empty($cache->data[$parent][$node_count])) {
+    if ($reset || !$cache || ($cache->expire && time() > $cache->expire) || empty($cache->data[$langcode][$parent][$node_count])) {
       // Cache is empty or data has become outdated or the parent is not cached.
       if ($cache) {
         // Cache exists and is not yet expired but $parent is missing.
         $terms[$vid] = $cache->data;
       }
       if ($reset) {
-        $terms[$vid][$parent] = array(
+        $terms[$vid][$langcode][$parent] = array(
           0 => array(),
           1 => array(),
         );
@@ -580,12 +598,16 @@ function shs_term_get_children($vid, $parent = 0, $settings = array(), $reset = 
       // Get term children (only first level).
       $tree = taxonomy_get_tree($vid, $parent, 1);
       foreach ($tree as $term) {
-        $terms[$vid][$parent][0][$term->tid] = $term->name;
+        $term_name = $term->name;
+        if (module_exists('i18n_taxonomy')) {
+          $term_name = i18n_taxonomy_term_name($term, $langcode);
+        }
+        $terms[$vid][$langcode][$parent][0][$term->tid] = $term_name;
         if ($node_count) {
           // Count nodes associated to this term (and its children).
           $num_nodes = _shs_term_get_node_count($term, TRUE);
           // Update term label.
-          $terms[$vid][$parent][1][$term->tid] = t('!term_name (!node_count)', array('!term_name' => $term->name, '!node_count' => $num_nodes));
+          $terms[$vid][$langcode][$parent][1][$term->tid] = t('!term_name (!node_count)', array('!term_name' => $term->name, '!node_count' => $num_nodes));
         }
       }
       // Set cached data.
@@ -604,7 +626,7 @@ function shs_term_get_children($vid, $parent = 0, $settings = array(), $reset = 
   );
   drupal_alter('shs_term_get_children', $terms, $alter_options);
 
-  return empty($terms[$vid][$parent][$node_count]) ? array() : $terms[$vid][$parent][$node_count];
+  return empty($terms[$vid][$langcode][$parent][$node_count]) ? array() : $terms[$vid][$langcode][$parent][$node_count];
 }
 
 /**

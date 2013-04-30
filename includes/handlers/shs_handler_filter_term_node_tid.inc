@@ -45,6 +45,8 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
   }
 
   function value_form(&$form, &$form_state) {
+    global $language;
+
     parent::value_form($form, $form_state);
 
     $multiple = $this->options['expose']['multiple'];
@@ -100,6 +102,7 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
         'create_new_terms' => FALSE,
         'create_new_levels' => FALSE,
         'required' => FALSE,
+        'language' => $language,
       );
       if (module_exists('chosen') && !empty($this->options['use_chosen'])) {
         $element_settings['use_chosen'] = $this->options['use_chosen'];
