@@ -62,7 +62,7 @@
             }
             if (addNextLevel) {
               // Try to add one additional level.
-              $select = shsElementCreate($field.attr('id'), fieldSettings, level);
+              $select = shsElementCreate($field.attr('id'), fieldSettings, ++level);
               $select.appendTo($field.parent());
               // Retrieve data for this level.
               getTermChildren($select, fieldSettings, parent_id, 0, $field.attr('id'));
