@@ -724,6 +724,9 @@ function shs_form_taxonomy_overview_terms_alter(&$form, &$form_state, $form_id) 
  * Implements hook_hook_taxonomy_term_delete().
  */
 function shs_form_taxonomy_overview_terms_submit(&$form, &$form_state) {
+  if (empty($form_state['complete form']['#vocabulary']->vid)) {
+    return;
+  }
   // Update vocabulary cache for the terms parents.
   shs_term_get_children($form_state['complete form']['#vocabulary']->vid, 0, array('node_count' => TRUE), TRUE);
 }
