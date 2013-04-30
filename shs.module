@@ -697,6 +697,9 @@ function shs_json_term_add($vid, $parent, $term_name) {
  * Implements hook_hook_taxonomy_term_insert().
  */
 function shs_taxonomy_term_insert($term) {
+  if (empty($term->parent)) {
+    return;
+  }
   // Update vocabulary cache for the terms parents.
   foreach ($term->parent as $parent) {
     shs_term_get_children($term->vid, $parent, array('node_count' => TRUE), TRUE);
@@ -707,6 +710,9 @@ function shs_taxonomy_term_insert($term) {
  * Implements hook_hook_taxonomy_term_update().
  */
 function shs_taxonomy_term_update($term) {
+  if (empty($term->parent)) {
+    return;
+  }
   // Update vocabulary cache for the terms parents.
   foreach ($term->parent as $parent) {
     shs_term_get_children($term->vid, $parent, array('node_count' => TRUE), TRUE);
