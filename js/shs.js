@@ -466,7 +466,7 @@
         $element.css({
           width : ($element.width() < minWidth) ? minWidth : $element.width()
         }).chosen(options);
-        return true;
+        return $element.hasClass('chzn-done');
       }
     }
     return false;
