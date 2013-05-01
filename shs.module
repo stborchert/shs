@@ -318,10 +318,11 @@ function shs_field_widget_afterbuild($element, &$form_state) {
   }
 
   $parents = array();
-  // Get value from element.
-  if (!empty($form_state['values'][$element['#field_name']][$element['#language']][$element['#delta']]['tid'])) {
+  // Get default value from form state and set it to element.
+  $default_value = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
+  if (!empty($default_value)) {
     // Use value from form_state (for example for fields with cardinality = -1).
-    $element['#default_value'] = $form_state['values'][$element['#field_name']][$element['#language']][$element['#delta']];
+    $element['#default_value'] = array('tid' => $default_value);
   }
 
   // Add main Javascript behavior and style only once.
@@ -374,6 +375,7 @@ function shs_field_widget_afterbuild($element, &$form_state) {
     $js_added[$element['#name']][$js_hash] = TRUE;
   }
 
+  unset($element['#needs_validation']);
   return $element;
 }
 
@@ -382,13 +384,12 @@ function shs_field_widget_afterbuild($element, &$form_state) {
  */
 function shs_field_widget_validate($element, &$form_state, $form) {
   $field_name = $element['#field_name'];
-  $field_language = $element['#language'];
+  $instance = field_widget_instance($element, $form_state);
 
-  if (empty($form_state['field'][$field_name][$field_language]['instance']['widget'])) {
+  if (empty($instance['widget'])) {
     return;
   }
-  $field = $form_state['field'][$field_name][$field_language];
-  $instance = $field['instance'];
+  $field = field_widget_field($element, $form_state);
   $settings = empty($instance['widget']['settings']['shs']) ? array() : $instance['widget']['settings']['shs'];
 
   // Do we want to force the user to select terms from the deepest level?
@@ -396,15 +397,15 @@ function shs_field_widget_validate($element, &$form_state, $form) {
   $value = empty($element['#value']) ? '_none' : $element['#value'];
   if ($value == '_none') {
     unset($element['#value']);
-    unset($form_state['values'][$field_name][$field_language][$element['#delta']]);
+    form_set_value($element, NULL, $form_state);
   }
   if ($element['#required'] && $value == '_none') {
     form_error($element, t('!name field is required.', array('!name' => $element['#title'])));
     return;
   }
   if ($force_deepest_level && $value) {
-    // Get vocabulary.
-    $allowed_values = reset($field['field']['settings']['allowed_values']);
+    // Get vocabulary from allowed settings.
+    $allowed_values = reset($field['settings']['allowed_values']);
     if (empty($allowed_values['vocabulary']) || ($vocabulary = taxonomy_vocabulary_machine_name_load($allowed_values['vocabulary'])) === FALSE) {
       // No vocabulary selected yet or vocabulary not found.
       form_error($element, t('Vocabulary %machine_name is configured as source for field %field_name but could not be found.', array('%machine_name' => $allowed_values['vocabulary'], '%field_name' => $field_name)));

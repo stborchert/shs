@@ -16,8 +16,9 @@
       $('select.shs-enabled')
         .once('shs')
         .addClass('element-invisible')
+        .hide()
         .each(function() {
-          var $field = $(this);
+          $field = $(this);
           var fieldName = $(this).attr('name');
 
           if (fieldName in settings.shs) {
