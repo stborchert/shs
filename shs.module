@@ -136,17 +136,6 @@ function _shs_json_callback_get_arguments($callback, $arguments) {
  * Implements hook_views_data_alter().
  */
 function shs_views_data_alter(&$data) {
-  // Get a list of all field instances with widget type "taxonomy_shs".
-  $instances = _shs_get_instances('node');
-  foreach ($instances as $field_instances) {
-    foreach ($field_instances as $field_name => $instance) {
-      // Replace filter handler for this field.
-      if (!empty($data["field_data_{$field_name}"]["{$field_name}_tid"]['filter']['handler'])) {
-        $data["field_data_{$field_name}"]["{$field_name}_tid"]['filter']['handler'] = 'shs_handler_filter_term_node_tid';
-      }
-    }
-  }
-
   // Add filter handler for term ID with depth.
   $data['node']['shs_term_node_tid_depth'] = array(
     'help' => t('Display content if it has the selected taxonomy terms, or children of the selected terms. Due to additional complexity, this has fewer options than the versions without depth. Optionally the filter will use a simple hierarchical select for the selection of terms.'),
@@ -156,6 +145,29 @@ function shs_views_data_alter(&$data) {
       'handler' => 'shs_handler_filter_term_node_tid_depth',
     ),
   );
+}
+
+/**
+ * Implements hook_field_views_data_alter().
+ */
+function shs_field_views_data_alter(&$result, &$field, $module) {
+  if (empty($field['columns']) || !in_array($field['type'], array('taxonomy_term_reference', 'entityreference'))) {
+    return;
+  }
+  if ($field['type'] == 'entityreference' && (empty($field['settings']['target_type']) || $field['settings']['target_type'] != 'taxonomy_term')) {
+    // Do not change entityreference fields that do not reference terms.
+    return;
+  }
+  $field_column = key($field['columns']);
+  foreach ($result as $key => $group) {
+    $field_identifier = sprintf('%s_%s', $field['field_name'], $field_column);
+    if (empty($group[$field_identifier]) || empty($group[$field_identifier]['filter']['handler'])) {
+      // Only modify field definitions for the primary column.
+      continue;
+    }
+    // Replace handler.
+    $result[$key][$field_identifier]['filter']['handler'] = ($field['type'] == 'entityreference') ? 'shs_handler_filter_entityreference' : 'shs_handler_filter_term_node_tid';
+  }
 }
 
 /**
@@ -439,8 +451,6 @@ function shs_field_widget_afterbuild($element, &$form_state) {
     else {
       $vocabulary_identifier = array(
         'field_name' => $element['#field_name'],
-        'entity_type' => $element['#entity_type'],
-        'bundle' => $element['#bundle'],
       );
     }
 
@@ -676,8 +686,6 @@ function shs_field_formatter_view($entity_type, $entity, $field, $instance, $lan
  * @param <mixed> $identifier
  *   Either a vocabulary ID or an array with the following keys:
  *   - field_name: Name of field which sends the request.
- *   - entity_type: Type of entity the field is attached to.
- *   - bundle: Name of bundle the field is attached to.
  * @param <int> $parent
  *   ID of parent term.
  * @param <array> $settings
@@ -704,8 +712,8 @@ function shs_term_get_children($identifier, $parent = 0, $settings = array(), $r
     $vocabulary_cache_key = $identifier;
     $vocabularies[] = $identifier;
   }
-  elseif (is_array($identifier) && !empty($identifier['field_name']) && !empty($identifier['entity_type']) && !empty($identifier['bundle'])) {
-    $vocabulary_cache_key = sprintf('%s:%s:%s', $identifier['field_name'], $identifier['entity_type'], $identifier['bundle']);
+  elseif (is_array($identifier) && !empty($identifier['field_name'])) {
+    $vocabulary_cache_key = $identifier['field_name'];
   }
 
   $terms = &drupal_static(__FUNCTION__, array());
@@ -1022,8 +1030,6 @@ function _shs_create_hash($length = 8) {
  * @param mixed $identifier
  *   Either a vocabulary ID or an array with the following keys:
  *   - field_name: Name of field which sends the request.
- *   - entity_type: Type of entity the field is attached to.
- *   - bundle: Name of bundle the field is attached to.
  *
  * @return boolean
  *   TRUE if validation passes, otherwise FALSE.

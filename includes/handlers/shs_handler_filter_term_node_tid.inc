@@ -66,20 +66,27 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
 
       if (!empty($form_state['input'][$identifier])) {
         $default_value = $form_state['input'][$identifier];
-        if (!is_array($default_value) && $multiple) {
-          $default_value = explode('+', $default_value);
-          foreach ($default_value as $delta => $value) {
-            $default_value[$delta] = explode(',', $value);
-          }
+        if ($multiple && !is_array($default_value)) {
+          $default_value = array($default_value);
         }
       }
 
       $parents = array();
       if (!empty($default_value) && $default_value != 'All') {
         if (is_array($default_value) && $default_value[0] != 'All') {
-          foreach ($default_value as $delta => $level) {
-            $parents[$delta]['tid'] = $level;
+          if (strpos($default_value[0], ',') !== FALSE || strpos($default_value[0], '+') !== FALSE) {
+            $values = array();
+            foreach ($default_value as $default) {
+              $values += preg_split('/[,\+]+/', $default, -1, PREG_SPLIT_NO_EMPTY);
+            }
+            $form_state['input'][$identifier] = empty($values) ? 'All' : $values;
+            $default_value = $values;
           }
+          $parents_multiple = array();
+          foreach ($default_value as $delta => $tid) {
+            $parents_multiple[] = $tid;
+          }
+          $parents[] = array('tid' => $parents_multiple);
         }
         elseif (is_string($default_value)) {
           $term_parents = taxonomy_get_parents_all($default_value);
@@ -115,7 +122,7 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
       // Create settings needed for our js magic.
       $settings_js = array(
         'shs' => array(
-          $identifier => array(
+          $identifier . ($multiple ? '[]' : '') => array(
             $js_hash => array(
               'vid' => $vocabulary->vid,
               'settings' => $element_settings,
@@ -133,29 +140,12 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
       // Add behavior.
       drupal_add_js(drupal_get_path('module', 'shs') . '/js/shs.js');
 
-      if (is_array($default_value) && $multiple && $default_value[0] != 'All') {
-        foreach ($default_value as $delta => $level) {
-          if ($delta == 0) {
-            $default_value_str = implode(',', $level);
-          }
-          else {
-            $default_value_str .= '+' . implode(',', $level);
-          }
-        }
-      }
-
-      // Rewrite default select to textfield.
-      $form['value'] = array(
-        '#type' => 'textfield',
-        '#default_value' => empty($default_value_str) ? 'All' : $default_value_str,
+      // Rewrite default select element.
+      $form['value'] += array(
         '#attributes' => array(
           'class' => array('element-invisible', 'shs-enabled'),
         ),
       );
-
-      if (!empty($form_state['exposed']) && isset($identifier) && empty($form_state['input'][$identifier]) || $multiple && isset($form_state['input'][$identifier][0])) {
-        $form_state['input'][$identifier] = empty($default_value_str) ? 'All' : $default_value_str;
-      }
     }
 
     if (empty($form_state['exposed'])) {
