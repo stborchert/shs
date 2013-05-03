@@ -54,7 +54,7 @@
               }
             });
             var addNextLevel = false;
-            if ((level > 1 || parent_id) && (fieldSettings.settings.create_new_terms && fieldSettings.settings.create_new_levels)) {
+            if ((level > 1 || parent_id) && ((fieldSettings.settings.create_new_terms && fieldSettings.settings.create_new_levels) || fieldSettings.settings.test_create_new_levels)) {
               // Add next level in hierarchy if new levels may be created.
               addNextLevel = true;
             }
@@ -129,14 +129,15 @@
             options[options.length] = new Option(settings.any_label, settings.any_value);
           }
 
-          if (settings.settings.create_new_terms) {
-            // Add option to add new item.
-            options[options.length] = new Option(Drupal.t('<Add new item>', {}, {context: 'shs'}), '_add_new_');
-          }
-
           // Add retrieved list of options.
           $.each(data.data, function(key, term) {
-            options[options.length] = new Option(term.label, term.tid);
+            if (term.vid) {
+              // Add option to add new item.
+              options[options.length] = new Option(Drupal.t('<Add new item>', {}, {context: 'shs'}), '_add_new_');
+            }
+            else {
+              options[options.length] = new Option(term.label, term.tid);
+            }
           });
           // Set default value.
           $element.val(default_value);
