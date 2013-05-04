@@ -115,7 +115,7 @@
             var options = $element.attr('options');
           }
 
-          if (data.data.length == 0 && !(settings.settings.create_new_terms && (settings.settings.create_new_levels || (parent_value[0] == settings.any_value && default_value == 0)))) {
+          if (((data.data.length == 0) || ((data.data.length == 1 && !data.data[0].tid))) && !(settings.settings.create_new_terms && (settings.settings.create_new_levels || (parent_value[0] == settings.any_value && default_value == 0)))) {
             // Remove element.
             $element.remove();
             return;
@@ -131,11 +131,11 @@
 
           // Add retrieved list of options.
           $.each(data.data, function(key, term) {
-            if (term.vid) {
+            if (term.vid && settings.settings.create_new_terms) {
               // Add option to add new item.
               options[options.length] = new Option(Drupal.t('<Add new item>', {}, {context: 'shs'}), '_add_new_');
             }
-            else {
+            else if (term.tid) {
               options[options.length] = new Option(term.label, term.tid);
             }
           });
