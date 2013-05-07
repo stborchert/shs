@@ -58,7 +58,7 @@
               // Add next level in hierarchy if new levels may be created.
               addNextLevel = true;
             }
-            if (fieldSettings.default_value && (fieldSettings.default_value.tid == parent_id)) {
+            if (fieldSettings.default_value && (fieldSettings.default_value == parent_id)) {
               addNextLevel = true;
             }
             if (addNextLevel) {
@@ -123,9 +123,9 @@
 
           // Remove all existing options.
           $('option', $element).remove();
-          // Add empty option (if field is not required and not multiple
-          // or this is not the first level and not multiple).
-          if (!settings.settings.required || (settings.settings.required && default_value === 0)) {
+          // Add empty option (if field is not required or this is not the
+          // first level.
+          if (!settings.settings.required || (settings.settings.required && (default_value === 0 || parent_value !== 0))) {
             options[options.length] = new Option(settings.any_label, settings.any_value);
           }
 
