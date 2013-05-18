@@ -136,7 +136,11 @@
               options[options.length] = new Option(Drupal.t('<Add new item>', {}, {context: 'shs'}), '_add_new_');
             }
             else if (term.tid) {
-              options[options.length] = new Option(term.label, term.tid);
+              option = new Option(term.label, term.tid);
+              options[options.length] = option;
+              if(term.has_children) {
+                option.setAttribute("class", "has-children");
+			  }
             }
           });
           // Set default value.

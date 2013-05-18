@@ -822,6 +822,7 @@ function shs_json_term_get_children($vid, $parent = array(), $settings = array()
       $result[] = array(
         'tid' => $tid,
         'label' => $label,
+        'has_children' => taxonomy_get_children($tid, $vid) ? TRUE : FALSE,
       );
     }
   }
