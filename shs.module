@@ -354,7 +354,7 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
     $element_value = 0;
   }
 
-  if (count($vocabularies) > 1 || !shs_add_term_access($vocabulary->vid)) {
+  if (count($vocabularies) > 1 || !user_access('edit terms in ' . $vocabulary->vid)) {
     // Creating new terms is allowed only with proper permission and if only one
     // vocabulary is selected as source.
     $instance['widget']['settings']['shs']['create_new_terms'] = FALSE;
