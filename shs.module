@@ -866,7 +866,7 @@ function shs_add_term_access($vid, $parent = NULL, $account = NULL) {
  *   Array with tid and name or FALSE on error.
  */
 function shs_json_term_add($vid, $parent, $term_name) {
-  if (!shs_add_term_access($vid, $parent, $account)) {
+  if (!shs_add_term_access($vid, $parent)) {
     // Sorry, but this user may not add a term to this vocabulary.
     return FALSE;
   }
