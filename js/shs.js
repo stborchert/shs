@@ -13,7 +13,7 @@
     // Default function to attach the behavior.
     attach: function (context, settings) {
       var self = this;
-      $('select.shs-enabled')
+      $('select.shs-enabled:not([disabled])')
         .once('shs')
         .addClass('element-invisible')
         .hide()
