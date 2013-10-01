@@ -20,6 +20,13 @@
         .each(function() {
           $field = $(this);
           var fieldName = $(this).attr('name');
+          // Multiform messes up the names of the fields
+          // to the format multiform[something][fieldname][...].
+          if (fieldName.indexOf('multiform') == 0) {
+            var split = fieldName.split('][');
+            split.splice(0, 1);
+            fieldName = split.splice(0, 1) + '[' + split.join('][');
+          }
 
           if (fieldName in settings.shs) {
             var fieldSettings = {};
