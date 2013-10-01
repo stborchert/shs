@@ -138,9 +138,9 @@
             else if (term.tid) {
               option = new Option(term.label, term.tid);
               options[options.length] = option;
-              if(term.has_children) {
+              if (term.has_children) {
                 option.setAttribute("class", "has-children");
-			  }
+              }
             }
           });
           // Set default value.
@@ -210,6 +210,29 @@
           $triggering_element.val(data.data.tid);
           // Set value of original field.
           updateFieldValue($triggering_element, base_id, level, settings);
+          // Add new child element if adding new levels is allowed.
+          if (settings.settings.create_new_levels) {
+            $element_new = shsElementCreate(base_id, settings, level + 1);
+            $element_new.appendTo($triggering_element.parent());
+            if ($element_new.prop) {
+              var options_new = $element_new.prop('options');
+            }
+            else {
+              var options_new = $element_new.attr('options');
+            }
+            // Add "none" option.
+            options_new[options_new.length] = new Option(settings.any_label, settings.any_value);
+            if (settings.settings.create_new_terms) {
+              // Add option to add new item.
+              options_new[options_new.length] = new Option(Drupal.t('<Add new item>', {}, {context: 'shs'}), '_add_new_');
+            }
+            // Try to convert the element to a "Chosen" element.
+            if (!elementConvertToChosen($element_new, settings)) {
+              // Display original dropdown element.
+              $element_new.fadeIn();
+              $element_new.css('display','inline-block');
+            }
+          }
         }
       },
       error: function(xhr, status, error) {
