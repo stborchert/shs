@@ -413,7 +413,7 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
     $handler = entityreference_get_selection_handler($field, $instance, $element['#entity_type'], $element['#entity']);
     $referencable_entities = $handler->getReferencableEntities();
     $options = array(
-      '_none' => empty($element['#required']) ? t('- None -') : t('- Select a value -'),
+      '_none' => empty($element['#required']) ? t('- None -', array(), array('context' => 'shs')) : t('- Select a value -', array(), array('context' => 'shs')),
     );
     foreach ($referencable_entities as $v_name => $terms) {
       $options += $terms;
@@ -509,7 +509,7 @@ function shs_field_widget_afterbuild($element, &$form_state) {
             'settings' => $element['#shs_settings'],
             'default_value' => $element['#default_value'],
             'parents' => array_reverse($parents),
-            'any_label' => empty($element['#required']) ? t('- None -') : t('- Select a value -'),
+            'any_label' => empty($element['#required']) ? t('- None -', array(), array('context' => 'shs')) : t('- Select a value -', array(), array('context' => 'shs')),
             'any_value' => '_none',
           ),
         ),
