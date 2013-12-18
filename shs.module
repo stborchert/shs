@@ -1006,8 +1006,13 @@ function _shs_term_get_node_count($term, $count_children = FALSE) {
   // Maybe this needs some more caching and value-updates on node_save()/
   // _update()/delete().
   if (empty($num_nodes["{$term->tid}:{$count_children}"])) {
+    $index_table = 'taxonomy_index';
+    if (module_exists('taxonomy_entity_index')) {
+      $index_table = 'taxonomy_entity_index';
+    }
+
     // Count nodes associated to this term.
-    $num_nodes["{$term->tid}:{$count_children}"] = db_select('taxonomy_index', 'ti')
+    $num_nodes["{$term->tid}:{$count_children}"] = db_select($index_table, 'ti')
             ->fields('ti')
             ->condition('tid', $term->tid)
             ->execute()
@@ -1020,7 +1025,7 @@ function _shs_term_get_node_count($term, $count_children = FALSE) {
         $tids[] = $child_term->tid;
       }
       if (count($tids)) {
-        $num_nodes["{$term->tid}:{$count_children}"] += db_select('taxonomy_index', 'ti')
+        $num_nodes["{$term->tid}:{$count_children}"] += db_select($index_table, 'ti')
                 ->fields('ti')
                 ->condition('tid', $tids, 'IN')
                 ->execute()
