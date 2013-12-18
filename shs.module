@@ -171,6 +171,51 @@ function shs_field_views_data_alter(&$result, &$field, $module) {
 }
 
 /**
+ * Implements hook_conditional_fields_states_handlers_alter().
+ */
+function shs_conditional_fields_states_handlers_alter(&$handlers) {
+  $handlers += array(
+    'shs_conditional_fields_states_handler_shs' => array(
+      array(
+        'tid' => array(
+          '#type' => 'select',
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * States handler for simple hierarchical selects.
+ */
+function shs_conditional_fields_states_handler_shs($field, $field_info, $options, &$state) {
+  switch ($options['values_set']) {
+    case CONDITIONAL_FIELDS_DEPENDENCY_VALUES_WIDGET:
+    case CONDITIONAL_FIELDS_DEPENDENCY_VALUES_AND:
+      $state[$options['state']][$options['selector']]['value'] = $state[$options['state']][$options['selector']]['value'][0]['tid'];
+      return;
+
+    case CONDITIONAL_FIELDS_DEPENDENCY_VALUES_XOR:
+      $select_states[$options['state']][] = 'xor';
+
+    case CONDITIONAL_FIELDS_DEPENDENCY_VALUES_REGEX:
+      $regex = TRUE;
+    case CONDITIONAL_FIELDS_DEPENDENCY_VALUES_NOT:
+    case CONDITIONAL_FIELDS_DEPENDENCY_VALUES_OR:
+      foreach ($options['values'] as $value) {
+        $select_states[$options['state']][] = array(
+          $options['selector'] => array(
+            $options['condition'] => empty($regex) ? array($value) : $options['value'],
+          ),
+        );
+      }
+      break;
+  }
+
+  $state = $select_states;
+}
+
+/**
  * Implements hook_field_widget_info().
  */
 function shs_field_widget_info() {
