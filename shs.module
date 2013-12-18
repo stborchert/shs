@@ -578,7 +578,7 @@ function shs_field_widget_validate($element, &$form_state, $form) {
       // Does the selected term has any children?
       $children = shs_term_get_children($vocabulary->vid, $value);
       if (count($children)) {
-        form_error($element, t('You need to select a term from the deepest level.'));
+        form_error($element, t('You need to select a term from the deepest level in field %field_name.', array('%field_name' => $field_name)));
         return;
       }
     }
