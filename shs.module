@@ -515,6 +515,8 @@ function shs_field_widget_afterbuild($element, &$form_state) {
         ),
       ),
     );
+    // Allow other modules to alter these settings.
+    drupal_alter(array('shs_js_settings', "shs_{$element['#field_name']}_js_settings"), $settings_js, $element['#field_name'], $vocabulary_identifier);
 
     // Add settings.
     drupal_add_js($settings_js, 'setting');
