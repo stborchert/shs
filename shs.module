@@ -34,7 +34,7 @@ function shs_js() {
       'access callback' => 'user_access',
       'access arguments' => array('access content'),
       'includes' => array('path'),
-      'dependencies' => array('taxonomy'),
+      'dependencies' => array('taxonomy', 'field', 'field_sql_storage'),
     ),
   );
 }
