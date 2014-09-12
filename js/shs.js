@@ -65,7 +65,7 @@
               // Add next level in hierarchy if new levels may be created.
               addNextLevel = true;
             }
-            if (fieldSettings.default_value && (fieldSettings.default_value == parent_id)) {
+            if (fieldSettings.default_value && (fieldSettings.default_value === parent_id) && (fieldSettings.default_value !== '')) {
               addNextLevel = true;
             }
             if (addNextLevel) {
