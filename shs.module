@@ -476,8 +476,9 @@ function shs_field_widget_afterbuild($element, &$form_state) {
   if (empty($js_added[$element['#name']][$js_hash])) {
     $element_value = $element['#default_value'];
 
-    if (empty($element_value)) {
-      // Add fake parent for new items.
+    // Ensure field is rendered if it is required but not selected.
+    if (empty($element_value) || $element_value == '_none') {
+      // Add fake parent for new items or field required submit fail.
       $parents[] = array('tid' => 0);
     }
     else {
