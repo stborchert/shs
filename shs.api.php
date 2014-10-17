@@ -59,7 +59,7 @@ function hook_shs_term_get_children_alter(&$terms, &$alter_options) {
 }
 
 /**
- * Alter Javascript settings of shs widgets.
+ * Alter Javascript settings of shs widgets in entity forms and views.
  *
  * @param array $settings_js
  *   Javascript settings for shs widgets.
