@@ -135,6 +135,7 @@ class shs_handler_filter_term_node_tid extends views_handler_filter_term_node_ti
           ),
         ),
       );
+      drupal_alter(array('shs_js_settings', "shs_{$identifier}_js_settings"), $settings_js, $identifier, $vocabulary->vid);
       // Add settings.
       drupal_add_js($settings_js, 'setting');
       // Add behavior.
