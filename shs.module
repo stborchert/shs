@@ -542,11 +542,19 @@ function shs_field_widget_validate($element, &$form_state, $form) {
   if (empty($instance['widget'])) {
     return;
   }
-  $field = field_widget_field($element, $form_state);
-  $settings = empty($instance['widget']['settings']['shs']) ? array() : $instance['widget']['settings']['shs'];
 
+  // Load default settings.
+  $settings = empty($instance['widget']['settings']['shs']) ? array() : $instance['widget']['settings']['shs'];
+  if (!empty($element['#shs_settings'])) {
+    // Use settings directly applied to widget (possibly overridden in
+    // hook_field_widget_form_alter() or
+    // hook_field_widget_WIDGET_TYPE_form_alter()).
+    $settings = $element['#shs_settings'];
+  }
   // Do we want to force the user to select terms from the deepest level?
   $force_deepest_level = empty($settings['force_deepest']) ? FALSE : $settings['force_deepest'];
+  $field = field_widget_field($element, $form_state);
+
   $value = empty($element['#value']) ? '_none' : $element['#value'];
   if ($value == '_none') {
     unset($element['#value']);
