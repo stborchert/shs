@@ -439,7 +439,12 @@ function shs_field_widget_form(&$form, &$form_state, $field, $instance, $langcod
     '#shs_vocabularies' => $vocabularies,
   );
 
-  return array($field_column => $element);
+  $return = array($field_column => $element);
+  if (!empty($element['#title'])) {
+    // Set title to "parent" element to enable label translation.
+    $return['#title'] = $element['#title'];
+  }
+  return $return;
 }
 
 /**
