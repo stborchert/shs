@@ -463,7 +463,7 @@
     // Create element.
     $element = $('<label>')
       .attr('for', base_id + '-select-' + level)
-      //.addClass('element-invisible')
+      .addClass('element-invisible')
       .html(settings.labels[labelKey]);
     // Return the new element.
     return $element;
