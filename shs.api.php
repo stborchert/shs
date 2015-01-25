@@ -89,9 +89,14 @@ function hook_shs_js_settings_alter(&$settings_js, $field_name, $vocabulary_iden
  *   ID or machine_name of vocabulary the settings are used for.
  */
 function hook_shs_FIELDNAME_js_settings_alter(&$settings_js, $field_name, $vocabulary_identifier) {
-  foreach ($settings_js['shs'] as $field => $container) {
-    foreach ($container as $identifier => $settings) {
-      $settings_js['shs'][$field][$identifier]['any_label'] = t(' - Select a term - ');
+  foreach ($settings_js['shs'] as $field => &$container) {
+    foreach ($container as $identifier => &$settings) {
+      // Define labels for each level.
+      $settings['labels'] = array(
+        FALSE, // No label for first level.
+        t('Country'),
+        t('City'),
+      );
     }
   }
 }

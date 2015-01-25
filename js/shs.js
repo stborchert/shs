@@ -49,6 +49,11 @@
                 // Add error-class if there was an error with the original field.
                 $select.addClass('error');
               }
+              // Add label to dropdown.
+              $label = shsLabelCreate($field.attr('id'), fieldSettings, level);
+              if ($label !== false) {
+                $label.appendTo($field.parent());
+              }
               $select.appendTo($field.parent());
               // Retrieve data for this level.
               getTermChildren($select, fieldSettings, parent_id, parent.tid, $field.attr('id'));
@@ -69,6 +74,11 @@
               addNextLevel = true;
             }
             if (addNextLevel) {
+              // Add label to dropdown.
+              $label = shsLabelCreate($field.attr('id'), fieldSettings, level);
+              if ($label !== false) {
+                $label.appendTo($field.parent());
+              }
               // Try to add one additional level.
               $select = shsElementCreate($field.attr('id'), fieldSettings, ++level);
               $select.appendTo($field.parent());
@@ -124,6 +134,7 @@
 
           if (((data.data.length == 0) || ((data.data.length == 1 && !data.data[0].tid))) && !(settings.settings.create_new_terms && (settings.settings.create_new_levels || (parent_value[0] == settings.any_value && default_value == 0)))) {
             // Remove element.
+            $element.prev('label').remove();
             $element.remove();
             return;
           }
@@ -248,6 +259,7 @@
       },
       complete: function(xhr, status) {
         // Remove container.
+        $container.prev('label').remove();
         $container.remove();
         // Display triggering element.
         $triggering_element.fadeIn();
@@ -274,9 +286,14 @@
       if (Drupal.settings.chosen) {
         // Remove element created by chosen.
         var elem_id = $(this).attr('id');
-        $('#' + elem_id.replace(/-/g, '_') + '_chzn').remove();
+        $element_chzn = $('#' + elem_id.replace(/-/g, '_') + '_chzn');
+        if ($element_chzn) {
+          $element_chzn.prev('label').remove();
+          $element_chzn.remove();
+        }
       }
       // Remove element.
+      $(this).prev('label').remove();
       $(this).remove();
     });
     //$triggering_element.nextAll('.chzn-container').remove();
@@ -315,6 +332,7 @@
         .bind('click', function(event) {
           event.preventDefault();
           // Remove container.
+          $container.prev('label').remove();
           $container.remove();
           // Reset value of triggering element.
           $triggering_element.val(settings.settings.any_value);
@@ -350,18 +368,23 @@
           }
           else {
             // Remove container.
+            $container.prev('label').remove();
             $container.remove();
             // Reset value of triggering element.
             $triggering_element.val(0);
             // Display triggering element.
             $triggering_element.fadeIn();
-            $triggering_element.css('display','inline-block');;
+            $triggering_element.css('display', 'inline-block');;
           }
         });
       $save.appendTo($buttons);
     }
     else if ($triggering_element.val() != 0 && $triggering_element.val() != settings.any_value) {
       level++;
+      $label = shsLabelCreate(base_id, settings, level);
+      if ($label !== false) {
+        $label.appendTo($triggering_element.parent());
+      }
       $element_new = shsElementCreate(base_id, settings, level);
       $element_new.appendTo($triggering_element.parent());
       // Retrieve list of items for the new element.
@@ -412,6 +435,36 @@
         })
         .hide();
     }
+    // Return the new element.
+    return $element;
+  }
+
+  /**
+   * Create label for dropdown in hierarchy.
+   *
+   * @param base_id
+   *   ID of original field which is rewritten as "taxonomy_shs".
+   * @param settings
+   *   Field settings.
+   * @param level
+   *   Current level in hierarchy.
+   *
+   * @return
+   *   The new <label> element or false if no label should be created.
+   */
+  shsLabelCreate = function(base_id, settings, level) {
+    var labelKey = level - 1;
+    if (!settings.hasOwnProperty('labels')) {
+      return false;
+    }
+    if (!settings.labels.hasOwnProperty(labelKey) || settings.labels[labelKey] === false) {
+      return false;
+    }
+    // Create element.
+    $element = $('<label>')
+      .attr('for', base_id + '-select-' + level)
+      //.addClass('element-invisible')
+      .html(settings.labels[labelKey]);
     // Return the new element.
     return $element;
   }
