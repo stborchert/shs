@@ -557,6 +557,10 @@
         }).chosen(options);
         return $element.hasClass('chzn-done');
       }
+      else if ((settings.settings.use_chosen == 'never') && (!$element.hasClass('chosen-disable'))) {
+        // Tell chosen to not process this element.
+        $element.addClass('chosen-disable');
+      }
     }
     return false;
   }
