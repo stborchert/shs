@@ -581,7 +581,7 @@ function shs_field_widget_validate($element, &$form_state, $form) {
     }
     if (empty($vocabulary_names)) {
       // No vocabulary selected yet.
-      form_error($element, t('No vocabulary is configured as source for field %field_name.', array('%field_name' => $field_name)));
+      form_error($element, t('No vocabulary is configured as source for field %field_name.', array('%field_name' => $instance['label'], '%field_machine_name' => $field_name)));
     }
     if (!is_array($vocabulary_names)) {
       $vocabulary_names = array($vocabulary_names);
@@ -589,7 +589,7 @@ function shs_field_widget_validate($element, &$form_state, $form) {
     foreach ($vocabulary_names as $vocabulary_name) {
       if (($vocabulary = taxonomy_vocabulary_machine_name_load($vocabulary_name)) === FALSE) {
         // Vocabulary not found. Stop here.
-        form_error($element, t('Vocabulary %machine_name is configured as source for field %field_name but could not be found.', array('%machine_name' => $vocabulary_name, '%field_name' => $field_name)));
+        form_error($element, t('Vocabulary %machine_name is configured as source for field %field_name but could not be found.', array('%machine_name' => $vocabulary_name, '%field_name' => $instance['label'], '%field_machine_name' => $field_name)));
         return;
       }
       // Does the selected term has any children?
