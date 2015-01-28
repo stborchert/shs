@@ -13,6 +13,11 @@
     // Default function to attach the behavior.
     attach: function (context, settings) {
       var self = this;
+      var settingsDefault = {
+        display: {
+          animationSpeed: 400,
+        }
+      };
       $('select.shs-enabled:not([disabled])')
         .once('shs')
         .addClass('element-invisible')
@@ -36,6 +41,7 @@
             $.each(settings.shs[fieldName], function(hash, setting) {
               fieldSettings = setting;
             });
+            $.extend(settingsDefault, fieldSettings);
             var level = 0;
             var parent_id = 0;
             // Update class of wrapper element.
@@ -167,7 +173,7 @@
           // Try to convert the element to a "Chosen" element.
           if (!elementConvertToChosen($element, settings)) {
             // Display original dropdown element.
-            $element.fadeIn();
+            $element.fadeIn(settings.display.animationSpeed);
             $element.css('display','inline-block');
           }
 
@@ -247,7 +253,7 @@
             // Try to convert the element to a "Chosen" element.
             if (!elementConvertToChosen($element_new, settings)) {
               // Display original dropdown element.
-              $element_new.fadeIn();
+              $element_new.fadeIn(settings.display.animationSpeed);
               $element_new.css('display','inline-block');
             }
           }
@@ -262,7 +268,7 @@
         $container.prev('label').remove();
         $container.remove();
         // Display triggering element.
-        $triggering_element.fadeIn();
+        $triggering_element.fadeIn(settings.display.animationSpeed);
         $triggering_element.css('display','inline-block');
       }
     });
@@ -339,7 +345,7 @@
 
           if (!elementConvertToChosen($triggering_element, settings)) {
             // Display triggering element.
-            $triggering_element.fadeIn();
+            $triggering_element.fadeIn(settings.display.animationSpeed);
             $triggering_element.css('display','inline-block');
           }
         });
@@ -373,7 +379,7 @@
             // Reset value of triggering element.
             $triggering_element.val(0);
             // Display triggering element.
-            $triggering_element.fadeIn();
+            $triggering_element.fadeIn(settings.display.animationSpeed);
             $triggering_element.css('display', 'inline-block');;
           }
         });

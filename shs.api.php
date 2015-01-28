@@ -97,6 +97,8 @@ function hook_shs_FIELDNAME_js_settings_alter(&$settings_js, $field_name, $vocab
         t('Country'),
         t('City'),
       );
+      // Small speed-up for anmiations (defaults to 400ms).
+      $settings['display']['animationSpeed'] = 100;
     }
   }
 }
