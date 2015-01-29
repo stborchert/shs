@@ -84,6 +84,7 @@ function shs_json_callbacks() {
         'vid' => 'shs_json_validation_vocabulary_identifier',
         'parent' => 'is_array',
         'settings' => 'is_array',
+        'field' => 'is_string',
       ),
     ),
     'shs_json_term_add' => array(
@@ -92,6 +93,7 @@ function shs_json_callbacks() {
         'vid' => 'shs_json_validation_vocabulary_identifier',
         'parent' => 'is_numeric',
         'name' => 'is_string',
+        'field' => 'is_string',
       ),
     ),
   );
@@ -855,23 +857,25 @@ function shs_term_get_children($identifier, $parent = 0, $settings = array(), $r
 /**
  * JSON callback to get the list of children of a term.
  *
- * @param <int> $vid
+ * @param int $vid
  *   ID of vocabulary the term is associated to.
- * @param <array> $parent
+ * @param array $parent
  *   List of parent terms.
- * @param <array> $settings
+ * @param array $settings
  *   Additional settings (for example "display node count").
+ * @param string $field
+ *   Name of field requesting the term list (DOM element name).
  *
- * @return <array>
+ * @return array
  *   Associative list of child terms.
  *
  * @see shs_term_get_children()
  */
-function shs_json_term_get_children($vid, $parent = array(), $settings = array()) {
+function shs_json_term_get_children($vid, $parent = array(), $settings = array(), $field = NULL) {
   $scope = $result = array();
   foreach ($parent as $tid) {
     $scope[] = shs_term_get_children($vid, $tid, $settings);
-    if (shs_add_term_access($vid, $tid)) {
+    if (shs_add_term_access($vid, $tid, $field)) {
       $result[] = array(
         'vid' => $vid,
       );
@@ -895,40 +899,44 @@ function shs_json_term_get_children($vid, $parent = array(), $settings = array()
 /**
  * Return access to create new terms.
  *
- * @param <int> $vid
+ * @param int $vid
  *   ID of vocabulary to create the term in.
- * @param <int> $parent
+ * @param int $parent
  *   ID of parent term (0 for top level).
- * @param <object> $account
+ * @param string $field
+ *   Name of field requesting the term list (DOM element name).
+ * @param object $account
  *   The user to check access for.
  *
- * @return <bool>
+ * @return bool
  *   TRUE or FALSE based on if user can create a term.
  */
-function shs_add_term_access($vid, $parent = NULL, $account = NULL) {
+function shs_add_term_access($vid, $parent = NULL, $field = NULL, $account = NULL) {
   global $user;
   if (!$account) {
     $account = $user;
   }
-  $access = module_invoke_all('shs_add_term_access', $vid, $parent, $account);
+  $access = module_invoke_all('shs_add_term_access', $vid, $parent, $field, $account);
   return !in_array(FALSE, $access, TRUE) && (user_access('edit terms in ' . $vid, $account) || in_array(TRUE, $access));
 }
 
 /**
  * Adds a term with ajax.
  *
- * @param <int> $vid
+ * @param int $vid
  *   ID of vocabulary to create the term in.
- * @param <int> $parent
+ * @param int $parent
  *   ID of parent term (0 for top level).
- * @param <string> $term_name
+ * @param string $term_name
  *   Name of new term.
+ * @param string $field
+ *   Name of field requesting the term list (DOM element name).
  *
- * @return <mixed>
+ * @return mixed
  *   Array with tid and name or FALSE on error.
  */
-function shs_json_term_add($vid, $parent, $term_name) {
-  if (!shs_add_term_access($vid, $parent)) {
+function shs_json_term_add($vid, $parent, $term_name, $field = NULL) {
+  if (!shs_add_term_access($vid, $parent, $field)) {
     // Sorry, but this user may not add a term to this vocabulary.
     return FALSE;
   }

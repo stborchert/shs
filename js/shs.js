@@ -41,7 +41,9 @@
             $.each(settings.shs[fieldName], function(hash, setting) {
               fieldSettings = setting;
             });
-            fieldSettings = $.extend({}, fieldSettings, settingsDefault);
+            fieldSettings = $.extend({}, fieldSettings, settingsDefault, {
+              fieldName: fieldName
+            });
             var level = 0;
             var parent_id = 0;
             // Update class of wrapper element.
@@ -126,7 +128,8 @@
         arguments: {
           vid: settings.vid,
           parent: parent_value,
-          settings: settings.settings
+          settings: settings.settings,
+          field: settings.fieldName
         }
       },
       success: function(data) {
@@ -216,7 +219,8 @@
         arguments: {
           vid: term.vid,
           parent: term.parent,
-          name: term.name
+          name: term.name,
+          field: settings.fieldName
         }
       },
       success: function(data) {

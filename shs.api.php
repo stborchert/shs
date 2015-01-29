@@ -15,6 +15,8 @@
  *   ID of vocabulary to create the term in.
  * @param int $parent
  *   ID of parent term (0 for top level).
+ * @param string $field
+ *   Name of field requesting the term list (DOM element name).
  * @param object $account
  *   The user to check access for.
  *
@@ -22,7 +24,7 @@
  *   <code>FALSE</code> if no new terms should be created below the given
  *   parent, otherwise <code>TRUE</code>.
  */
-function hook_shs_add_term_access($vid, $parent, $account) {
+function hook_shs_add_term_access($vid, $parent, $field, $account) {
   // Deny creating new terms on tid 0 and 3.
   if ($parent == 0 || $parent == 3) {
     return FALSE;
