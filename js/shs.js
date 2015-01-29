@@ -366,7 +366,7 @@
           // Create a term object.
           var term = {
             vid: settings.vid,
-            parent: (level == 1) ? 0 : ($triggering_element.prev('select').val() || 0),
+            parent: (level === 1) ? 0 : ($triggering_element.prevAll('.shs-select').val() || 0),
             name: termName
           };
           if (termName.length > 0) {
