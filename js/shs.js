@@ -41,7 +41,7 @@
             $.each(settings.shs[fieldName], function(hash, setting) {
               fieldSettings = setting;
             });
-            $.extend(settingsDefault, fieldSettings);
+            fieldSettings = $.extend({}, fieldSettings, settingsDefault);
             var level = 0;
             var parent_id = 0;
             // Update class of wrapper element.
