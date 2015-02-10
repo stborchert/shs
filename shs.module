@@ -119,16 +119,17 @@ function _shs_json_callback_get_arguments($callback, $arguments) {
   // Get arguments from callback definition.
   $callback_arguments = $callback['arguments'];
   foreach ($arguments as $key => $value) {
-    if (isset($callback_arguments[$key])) {
-      $argument_valid = TRUE;
-      if ((($validation_function = $callback_arguments[$key]) !== FALSE) && function_exists($validation_function)) {
-        // Validate argument.
-        $argument_valid = $validation_function($value);
-      }
-      if ($argument_valid) {
-        // Add argument and its value to the result list.
-        $result[$key] = $value;
-      }
+    if (!isset($callback_arguments[$key])) {
+      continue;
+    }
+    $argument_valid = TRUE;
+    if ((($validation_function = $callback_arguments[$key]) !== FALSE) && function_exists($validation_function)) {
+      // Validate argument.
+      $argument_valid = $validation_function($value);
+    }
+    if ($argument_valid) {
+      // Add argument and its value to the result list.
+      $result[$key] = $value;
     }
   }
   return $result;
@@ -194,6 +195,9 @@ function shs_conditional_fields_states_handler_shs($field, $field_info, $options
   switch ($options['values_set']) {
     case CONDITIONAL_FIELDS_DEPENDENCY_VALUES_WIDGET:
     case CONDITIONAL_FIELDS_DEPENDENCY_VALUES_AND:
+      if (empty($state[$options['state']][$options['selector']])) {
+        return;
+      }
       $state[$options['state']][$options['selector']]['value'] = $state[$options['state']][$options['selector']]['value'][0]['tid'];
       return;
 
@@ -775,7 +779,11 @@ function shs_term_get_children($identifier, $parent = 0, $settings = array(), $r
   $vocabulary_cache_key = NULL;
   if (is_numeric($identifier)) {
     $vocabulary_cache_key = $identifier;
-    $vocabularies[] = $identifier;
+    if (($vocabulary = taxonomy_vocabulary_load($identifier)) === FALSE) {
+      watchdog('Simple hierarchical select', 'Unknown vocabulary with ID !vid used to get terms.', array('!vid' => $identifier));
+      return array();
+    }
+    $vocabularies[$vocabulary->machine_name] = $identifier;
   }
   elseif (is_array($identifier) && !empty($identifier['field_name'])) {
     $vocabulary_cache_key = $identifier['field_name'];
@@ -812,19 +820,22 @@ function shs_term_get_children($identifier, $parent = 0, $settings = array(), $r
         if (!empty($field['settings']['handler_settings']['target_bundles'])) {
           foreach ($field['settings']['handler_settings']['target_bundles'] as $vocabulary_name) {
             if (($vocabulary = taxonomy_vocabulary_machine_name_load($vocabulary_name)) !== FALSE) {
-              $vocabularies[] = $vocabulary->vid;
+              $vocabularies[$vocabulary_name] = $vocabulary->vid;
             }
           }
         }
       }
 
-      foreach ($vocabularies as $vid) {
+      foreach ($vocabularies as $name => $vid) {
         // Get term children (only first level).
-        $tree = taxonomy_get_tree($vid, $parent, 1);
+        $tree = taxonomy_get_tree($vid, $parent, 1, TRUE);
         foreach ($tree as $term) {
           $term_name = $term->name;
           if (module_exists('i18n_taxonomy')) {
             $term_name = i18n_taxonomy_term_name($term, $langcode);
+          }
+          else if (module_exists('entity_translation')) {
+            $term_name = entity_label('taxonomy_term', $term);
           }
           $terms[$vocabulary_cache_key][$langcode][$parent][0][$term->tid] = $term_name;
           if ($node_count) {
