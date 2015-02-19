@@ -947,6 +947,7 @@ function shs_add_term_access($vid, $parent = NULL, $field = NULL, $account = NUL
  *   Array with tid and name or FALSE on error.
  */
 function shs_json_term_add($vid, $parent, $term_name, $field = NULL) {
+  global $language_content;
   if (!shs_add_term_access($vid, $parent, $field)) {
     // Sorry, but this user may not add a term to this vocabulary.
     return FALSE;
@@ -956,6 +957,7 @@ function shs_json_term_add($vid, $parent, $term_name, $field = NULL) {
     'vid' => $vid,
     'parent' => $parent,
     'name' => str_replace('&amp;', '&', filter_xss($term_name)),
+    'language' => $language_content->language,
   );
   // Save term.
   $status = taxonomy_term_save($term);
