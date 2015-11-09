@@ -28,7 +28,7 @@ function shs_menu() {
  * Implements hook_js().
  */
 function shs_js() {
-  return array(
+  $settings = array(
     'json' => array(
       'callback' => 'shs_json',
       'access callback' => 'user_access',
@@ -37,6 +37,8 @@ function shs_js() {
       'dependencies' => array('taxonomy', 'field', 'field_sql_storage'),
     ),
   );
+  drupal_alter('shs_js_info', $settings);
+  return $settings;
 }
 
 /**
