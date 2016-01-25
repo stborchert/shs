@@ -1,0 +1,11 @@
+shs.form:
+  version: VERSION
+  css:
+    component:
+      css/shs.form.css: {}
+
+shs.formatter:
+  version: VERSION
+  css:
+    component:
+      css/shs.formatter.css: {}

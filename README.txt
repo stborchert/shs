@@ -1,18 +1,18 @@
 
 -- SUMMARY --
 
-The Simple hierarchical select module displays selected taxonomy fields as
-hierarchical selects on node creation/edit forms and as exposed filter in views.
+The 'Simple hierarchical select' module displays selected taxonomy fields as
+hierarchical selects on entity forms and as exposed filter in views.
 
 
 -- REQUIREMENTS --
 
-Taxonomy module (Drupal core) needs to be enabled.
+The 'Taxonomy' module (Drupal core) needs to be enabled.
 
 
 -- INSTALLATION --
 
-* Install as usual, see http://drupal.org/documentation/install/modules-themes/modules-7
+* Install as usual, see https://www.drupal.org/documentation/install/modules-themes/modules-8
   for further information.
 
 
