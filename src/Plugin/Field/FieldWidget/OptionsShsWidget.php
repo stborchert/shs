@@ -7,6 +7,7 @@
 
 namespace Drupal\shs\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsSelectWidget;
 use Drupal\Core\Form\FormStateInterface;
@@ -115,7 +116,81 @@ class OptionsShsWidget extends OptionsSelectWidget {
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
+    global $base_url;
     $element = parent::formElement($items, $delta, $element, $form, $form_state);
+    if (isset($form_state->getBuildInfo()['base_form_id']) && ('field_config_form' === $form_state->getBuildInfo()['base_form_id'])) {
+      // Do not display the shs widget in the field config.
+      return $element;
+    }
+
+    $default_value = $element['#default_value'][$delta] ? : NULL;
+    $target_bundles = $this->getFieldSetting('handler_settings')['target_bundles'];
+    $settings_additional = [
+      'required' => $element['#required'],
+      'multiple' => $element['#multiple'],
+      'anyLabel' => empty($element['#required']) ? t('- None -', [], ['context' => 'shs']) : t('- Select a value -', [], ['context' => 'shs']),
+      'anyValue' => '_none',
+    ];
+
+    $parents = [[
+      'parent' => 0,
+      'defaultValue' => $settings_additional['anyValue'],
+    ]];
+    if ($default_value) {
+      try {
+        $storage = \Drupal::entityTypeManager()->getStorage($this->fieldDefinition->getItemDefinition()->getSetting('target_type'));
+        $parent_terms = array_reverse(array_keys($storage->loadAllParents($default_value)));
+        // Do not include the default value.
+        array_pop($parent_terms);
+        $keys = array_merge([0], $parent_terms);
+        $values = array_merge($parent_terms, [$default_value]);
+        $parents = [];
+        foreach ($keys as $index => $key) {
+          $parents[] = [
+            'parent' => $key,
+            'defaultValue' => $values[$index] ?: $settings_additional['anyValue'],
+          ];
+        }
+      }
+      catch (Exception $ex) {
+
+      }
+    }
+
+    $element += [
+      '#shs' => [
+        'settings' => $this->getSettings() + $settings_additional,
+        'bundle' => reset($target_bundles),
+        'baseUrl' => $base_url . '/shs-term-data',
+        'parents' => $parents,
+        'defaultValue' => $default_value ? : $settings_additional['anyValue'],
+      ],
+    ];
+    $element['#attributes'] = $element['#attributes'] ? : [];
+    $element['#attributes'] = array_merge($element['#attributes'], [
+      'class' => ['shs-enabled'],
+    ]);
+    $element['#attached'] = $element['#attached'] ? : [];
+    $element['#attached'] = array_merge($element['#attached'], [
+      'library' => ['shs/shs.form'],
+    ]);
+    return $element;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function afterBuild(array $element, FormStateInterface $form_state) {
+    $element = parent::afterBuild($element, $form_state);
+
+    $element['#attached'] = $element['#attached'] ? : [];
+    $element['#attached'] = array_merge($element['#attached'], [
+      'drupalSettings' => [
+        'shs' => [
+          $element['#field_name'] => $element['#shs'],
+        ],
+      ],
+    ]);
 
     return $element;
   }
@@ -123,9 +198,17 @@ class OptionsShsWidget extends OptionsSelectWidget {
   /**
    * {@inheritdoc}
    */
+  public static function isApplicable(FieldDefinitionInterface $field_definition) {
+    // The widget only works with fields having one target bundle as source.
+    return count($field_definition->getSetting('handler_settings')['target_bundles']) === 1;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function supportsGroups() {
-    // @ToDo: really?
-    return TRUE;
+    // We do not support optgroups.
+    return FALSE;
   }
 
   /**
@@ -138,7 +221,7 @@ class OptionsShsWidget extends OptionsSelectWidget {
    *   Value of the setting. If boolean, the value is "translated" to 'true' or
    *   'false'.
    */
-  public function settingToString($key) {
+  protected function settingToString($key) {
     $options = [
       FALSE => t('false'),
       TRUE => t('true'),

@@ -2,3 +2,7 @@
 * @file
 * Styles for shs module on forms.
 */
+
+.shs-widget-container {
+  display: inline-block;
+}
