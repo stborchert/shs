@@ -20,7 +20,6 @@
      * @type {object}
      *
      * @prop {integer} tid
-     * @prop {string} vid
      * @prop {string} langcode
      * @prop {string} name
      */
@@ -32,13 +31,6 @@
        * @type {integer}
        */
       tid: null,
-
-      /**
-       * Vocabulary identifier of the term.
-       *
-       * @type {string}
-       */
-      vid: null,
 
       /**
        * Language code of the term.
@@ -53,6 +45,13 @@
        * @type {string}
        */
       name: '',
+
+      /**
+       * Description of the term.
+       *
+       * @type {string}
+       */
+      description: '',
 
       /**
        * Attribute to use as Id.
@@ -75,10 +74,10 @@
      */
     parse: function (response, options) {
       return {
-        tid: response.tid[0].value,
-        vid: response.vid[0].target_id,
-        langcode: response.langcode[0].value,
-        name: response.name[0].value
+        tid: response.tid,
+        name: response.name,
+        description: response.description__value,
+        langcode: response.langcode
       };
     }
   });

@@ -35,7 +35,7 @@
       console.log('[initialize] shs.AppView');
       this.config = this.model.get('config');
 
-      this.$el.once('shs').addClass('element-invisible').hide();
+      this.$el.once('shs').addClass('visually-hidden');
 
       this.collection = new Drupal.shs.WidgetCollection({
         url: this.config.baseUrl + '/' + this.config.bundle
@@ -118,10 +118,12 @@
         this.collection.remove(model);
       });
 
-      // Add new model with current selection.
-      this.collection.add(new Drupal.shs.WidgetModel({
-        id: value
-      }));
+      if (value !== this.config.settings.anyValue) {
+        // Add new model with current selection.
+        this.collection.add(new Drupal.shs.WidgetModel({
+          id: value
+        }));
+      }
 
       // Trigger events.
       this.collection.trigger('initialize');

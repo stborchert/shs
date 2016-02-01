@@ -76,57 +76,64 @@
      * @inheritdoc
      */
     render: function () {
+      var widget = this;
       console.log('[render] shs.WidgetView');
-      this.$el.attr('id', this.app.$el.attr('id') + '-shs-' + this.level)
+      widget.$el.attr('id', widget.app.$el.attr('id') + '-shs-' + widget.level)
               .addClass('shs-select')
               // Add core class to apply default styles to the element.
               .addClass('form-select')
               .hide();
-      if (this.model.get('dataLoaded')) {
-        this.$el.show();
+      if (widget.model.get('dataLoaded')) {
+        widget.$el.show();
       }
 
-      if (this.$el.prop) {
-        var options = this.$el.prop('options');
+      if (widget.$el.prop) {
+        var options = widget.$el.prop('options');
       }
       else {
-        var options = this.$el.attr('options');
+        var options = widget.$el.attr('options');
       }
 
       // Remove all existing options.
-      $('option', this.$el).remove();
+      $('option', widget.$el).remove();
 
       // Add "any" option. @todo
-      if (!this.config.settings.required) {
-        options[options.length] = new Option(this.config.settings.anyLabel, this.config.settings.anyValue);
+      if (!widget.config.settings.required) {
+        widget.$el.append($('<option>').text(widget.config.settings.anyLabel).val(widget.config.settings.anyValue));
       }
 
       // Create options from collection.
-      this.model.itemCollection.each(function (item) {
-        if (item.get('tid')) {
-          var option = new Option(item.get('name'), item.get('tid'));
-          options[options.length] = option;
-          if (item.get('hasChildren')) {
-            option.setAttribute('class', 'has-children');
-          }
+      widget.model.itemCollection.each(function (item) {
+        if (!item.get('tid')) {
+          return;
         }
+        var optionModel = new Drupal.shs.WidgetItemOptionModel({
+          label: item.get('name'),
+          value: item.get('tid'),
+          hasChildren: item.get('hasChildren')
+        });
+        var option = new Drupal.shs.WidgetItemView({
+          model: optionModel
+        });
+        widget.$el.append(option.render().$el);
       });
 
       // Set default value of widget.
-      this.$el.val(this.model.get('defaultValue'));
+      widget.$el.val(widget.model.get('defaultValue'));
 
-      var $container = $($('.shs-widget-container', $(this.app.container)).get(this.level));
+      var $container = $($('.shs-widget-container', $(widget.app.container)).get(widget.level));
       // Add widget to container.
-      if (this.model.get('dataLoaded')) {
-        $container.append(this.$el);
+      if (widget.model.get('dataLoaded')) {
+        // Add element without using any effect.
+        $container.append(widget.$el);
       }
       else {
-        $container.append(this.$el.fadeIn(this.config.display.animationSpeed));
+        $container.append(widget.$el.fadeIn(widget.config.display.animationSpeed));
       }
 
-      this.model.set('dataLoaded', true);
+      widget.model.set('dataLoaded', true);
       // Return self for chaining.
-      return this;
+      return widget;
     },
     /**
      * React to selection changes within the element.
