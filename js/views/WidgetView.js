@@ -107,12 +107,12 @@
         if (!item.get('tid')) {
           return;
         }
-        var optionModel = new Drupal.shs.WidgetItemOptionModel({
+        var optionModel = new Drupal.shs.classes[widget.app.config.fieldName].models.widgetItemOption({
           label: item.get('name'),
           value: item.get('tid'),
           hasChildren: item.get('hasChildren')
         });
-        var option = new Drupal.shs.WidgetItemView({
+        var option = new Drupal.shs.classes[widget.app.config.fieldName].views.widgetItem({
           model: optionModel
         });
         widget.$el.append(option.render().$el);

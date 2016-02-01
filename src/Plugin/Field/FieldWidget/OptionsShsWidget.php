@@ -132,10 +132,12 @@ class OptionsShsWidget extends OptionsSelectWidget {
       'anyValue' => '_none',
     ];
 
-    $parents = [[
-      'parent' => 0,
-      'defaultValue' => $settings_additional['anyValue'],
-    ]];
+    $parents = [
+      [
+        'parent' => 0,
+        'defaultValue' => $settings_additional['anyValue'],
+      ]
+    ];
     if ($default_value) {
       try {
         $storage = \Drupal::entityTypeManager()->getStorage($this->fieldDefinition->getItemDefinition()->getSetting('target_type'));
@@ -148,7 +150,7 @@ class OptionsShsWidget extends OptionsSelectWidget {
         foreach ($keys as $index => $key) {
           $parents[] = [
             'parent' => $key,
-            'defaultValue' => $values[$index] ?: $settings_additional['anyValue'],
+            'defaultValue' => $values[$index] ? : $settings_additional['anyValue'],
           ];
         }
       }
@@ -183,6 +185,9 @@ class OptionsShsWidget extends OptionsSelectWidget {
   public static function afterBuild(array $element, FormStateInterface $form_state) {
     $element = parent::afterBuild($element, $form_state);
 
+    $element['#shs'] += [
+      'classes' => shs_get_class_definitions($element['#field_name']),
+    ];
     $element['#attached'] = $element['#attached'] ? : [];
     $element['#attached'] = array_merge($element['#attached'], [
       'drupalSettings' => [

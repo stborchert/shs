@@ -1,7 +1,43 @@
 <?php
+
 /**
  * @file
  * Main functions and methods for the "Simple hierarchical select" module.
  */
 
+/**
+ * List all javascript classes used to create models and views in the widget.
+ *
+ * @param string $field_name
+ *   Name of field to get the definitions for.
+ *
+ * @see hook_shs_class_definitions_alter()
+ *
+ * @return array
+ *   List of javascript classes keyed by type ("models", "views").
+ */
+function shs_get_class_definitions($field_name) {
+  $definitions = [
+    'models' => [
+      'app' => 'Drupal.shs.AppModel',
+      'widget' => 'Drupal.shs.WidgetModel',
+      'widgetItem' => 'Drupal.shs.WidgetItemModel',
+      'widgetItemOption' => 'Drupal.shs.WidgetItemOptionModel',
+    ],
+    'views' => [
+      'app' => 'Drupal.shs.AppView',
+      'widget' => 'Drupal.shs.WidgetView',
+      'widgetItem' => 'Drupal.shs.WidgetItemView',
+    ],
+  ];
 
+  $hooks = [
+    'shs_class_definitions',
+    "shs_{$field_name}_class_definitions",
+  ];
+
+  // Allow other modules to override the list of class definitions.
+  \Drupal::moduleHandler()->alter($hooks, $definitions);
+
+  return $definitions;
+}

@@ -22,27 +22,51 @@
           animationSpeed: 400,
         }
       };
+
       $(context).find('select.shs-enabled:not([disabled])').each(function () {
         var field = this;
-        var fieldConfig = $.extend({}, drupalSettings.shs[$(this).attr('name')], settingsDefault, {
+        var config = $.extend({}, drupalSettings.shs[$(this).attr('name')], settingsDefault, {
           fieldName: $(field).attr('name')
         });
+        // Initialize model and view classes for the field.
+        Drupal.behaviors.shs.initClasses(config.fieldName, config.classes);
 
-        var app_model = new Drupal.shs.AppModel({
-          config: fieldConfig
+        // Initialize application model.
+        var app_model = new Drupal.shs.classes[config.fieldName].models.app({
+          config: config
         });
 
-        var app_view = new Drupal.shs.AppView({
+        // Initialize application view.
+        var app_view = new Drupal.shs.classes[config.fieldName].views.app({
           el: field,
           model: app_model
         });
-        Drupal.shs.views.appViews.push(app_view);
         app_view.render();
 
         // Broadcast model changes to other modules.
 //        widget_model.on('change:items', function (model) {
 //          $(document).trigger('shsWidgetItemsChange');
 //        });
+      });
+    },
+    /**
+     * Initialize model and widget classes.
+     *
+     * @param {string} fieldName
+     *   Name of field to initialize the classes for.
+     * @param {object} definitions
+     *   List of class names.
+     */
+    initClasses: function (fieldName, definitions) {
+      Drupal.shs.classes[fieldName] = Drupal.shs.classes[fieldName] || {
+        models: {},
+        views: {}
+      };
+      $.each(definitions.models, function (modelKey, modelClass) {
+        Drupal.shs.classes[fieldName].models[modelKey] = Drupal.shs.getClass(modelClass);
+      });
+      $.each(definitions.views, function (viewKey, viewClass) {
+        Drupal.shs.classes[fieldName].views[viewKey] = Drupal.shs.getClass(viewClass);
       });
     }
   };
@@ -53,20 +77,37 @@
    * @namespace
    */
   Drupal.shs = {
+
     /**
-     * A hash of View instances.
+     * A hash of model and view classes for each field.
      *
-     * @type {object.<string, Backbone.View>}
+     * @type {object}
      */
-    views: {
-      appViews: []
-    },
+    classes: {},
+
     /**
-     * A hash of Model instances.
+     * Get view/model class from name. Allows overriding every class within shs.
      *
-     * @type {object.<string, Backbone.Model>}
+     * @param {string} classname
+     *   Name of class to load.
+     * @returns {object}
+     *   Instantiable class.
      */
-    models: {}
+    getClass: function (classname) {
+      var parts = classname.split('.');
+
+      var fn = (window || this);
+      for (var i = 0, len = parts.length; i < len; i++) {
+        fn = fn[parts[i]];
+      }
+
+      if (typeof fn !== 'function') {
+        throw new Error('Class/function not found: [' + classname + ']');
+      }
+
+      return fn;
+    }
+
   };
 
 }(jQuery, Drupal, drupalSettings));

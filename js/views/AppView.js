@@ -64,7 +64,7 @@
 
       $.each(app.config.parents, function (index, item) {
         // Add WidgetModel for each parent.
-        app.collection.add(new Drupal.shs.WidgetModel({
+        app.collection.add(new Drupal.shs.classes[app.config.fieldName].models.widget({
           id: item.parent,
           defaultValue: item.defaultValue
         }));
@@ -88,7 +88,7 @@
         // Create container for widget.
         $(app.container).append($('<div>').addClass('shs-widget-container'));
         // Create widget.
-        new Drupal.shs.WidgetView({
+        new Drupal.shs.classes[app.config.fieldName].views.widget({
           app: app,
           model: widgetModel,
           level: level
@@ -108,6 +108,7 @@
      *   View displaying the model.
      */
     selectionUpdate: function (widgetModel, value, widgetView) {
+      var app = this;
       console.log('Selection changed to [' + value + '] in level [' + widgetModel.get('level') + ']');
       // Find all WidgetModels with a higher level than the changed model.
       var models = _.filter(this.collection.models, function (model) {
@@ -115,18 +116,18 @@
       });
       // Remove the found models from the collection.
       $.each(models, function (index, model) {
-        this.collection.remove(model);
+        app.collection.remove(model);
       });
 
-      if (value !== this.config.settings.anyValue) {
+      if (value !== app.config.settings.anyValue) {
         // Add new model with current selection.
-        this.collection.add(new Drupal.shs.WidgetModel({
+        app.collection.add(new Drupal.shs.classes[app.config.fieldName].models.widget({
           id: value
         }));
       }
 
       // Trigger events.
-      this.collection.trigger('initialize');
+      app.collection.trigger('initialize');
     }
   });
 
