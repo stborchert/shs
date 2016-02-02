@@ -102,7 +102,7 @@ class OptionsShsWidget extends OptionsSelectWidget {
     else {
       $summary[] = t('Do not allow creation of new terms');
     }
-    if ($this->getSetting('create_new_terms')) {
+    if ($this->getSetting('force_deepest')) {
       $summary[] = t('Force selection of deepest level');
     }
     else {
@@ -124,11 +124,14 @@ class OptionsShsWidget extends OptionsSelectWidget {
     }
 
     $default_value = $element['#default_value'][$delta] ? : NULL;
+    if ($form_state_default = $form_state->getUserInput()[$this->fieldDefinition->getName()]) {
+      $default_value = $form_state_default;
+    }
     $target_bundles = $this->getFieldSetting('handler_settings')['target_bundles'];
     $settings_additional = [
       'required' => $element['#required'],
       'multiple' => $element['#multiple'],
-      'anyLabel' => empty($element['#required']) ? t('- None -', [], ['context' => 'shs']) : t('- Select a value -', [], ['context' => 'shs']),
+      'anyLabel' => $this->getEmptyLabel() ?: t('- None -'),
       'anyValue' => '_none',
     ];
 
@@ -138,12 +141,10 @@ class OptionsShsWidget extends OptionsSelectWidget {
         'defaultValue' => $settings_additional['anyValue'],
       ]
     ];
-    if ($default_value) {
+    if ($default_value && ($settings_additional['anyValue'] !== $default_value)) {
       try {
         $storage = \Drupal::entityTypeManager()->getStorage($this->fieldDefinition->getItemDefinition()->getSetting('target_type'));
         $parent_terms = array_reverse(array_keys($storage->loadAllParents($default_value)));
-        // Do not include the default value.
-        array_pop($parent_terms);
         $keys = array_merge([0], $parent_terms);
         $values = array_merge($parent_terms, [$default_value]);
         $parents = [];
@@ -185,6 +186,11 @@ class OptionsShsWidget extends OptionsSelectWidget {
   public static function afterBuild(array $element, FormStateInterface $form_state) {
     $element = parent::afterBuild($element, $form_state);
 
+    if (empty($element['#shs'])) {
+      // Simply return the unaltered element if there is no information attached
+      // about SHS (i.e. on field config forms).
+      return $element;
+    }
     $element['#shs'] += [
       'classes' => shs_get_class_definitions($element['#field_name']),
     ];

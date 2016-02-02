@@ -23,15 +23,12 @@
      *
      * @augments Backbone.View
      */
-    initialize: function () {
-      console.log('[initialize] shs.WidgetItemView');
-    },
+    initialize: function () {},
 
     /**
      * @inheritdoc
      */
     render: function () {
-      console.log('[render] shs.WidgetItemView');
       if ((typeof this.model.get('value') === undefined) || (this.model.get('value') === null)) {
         // Do not render item.
         return;

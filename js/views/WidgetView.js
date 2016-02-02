@@ -15,12 +15,6 @@
      */
     app: null,
     /**
-     * Widget level (position).
-     *
-     * @type {integer}
-     */
-    level: 0,
-    /**
      * Default tagname of this view.
      *
      * @type {string}
@@ -33,12 +27,6 @@
       'change': 'selectionChange'
     },
     /**
-     * Field configuration.
-     *
-     * @type {object}
-     */
-    config: {},
-    /**
      * Backbone View for shs widgets.
      *
      * @constructs
@@ -46,26 +34,21 @@
      * @augments Backbone.View
      */
     initialize: function (options) {
-      console.log('[initialize] shs.WidgetView');
       this.app = options.app;
-      this.level = options.level;
-      this.model.set('level', options.level);
-
-      this.config = this.app.model.get('config');
 
       if (!this.model.get('dataLoaded')) {
         // Create new item collection.
         this.model.itemCollection = new Drupal.shs.WidgetItemCollection({
-          url: this.config.baseUrl + '/' + this.config.bundle + '/' + this.model.get('id')
+          url: this.app.getConfig('baseUrl') + '/' + this.app.getConfig('bundle') + '/' + this.model.get('id')
         });
       }
 
-      this.listenTo(this, 'rerender', this.render);
+      this.listenTo(this, 'widget:rerender', this.render);
       this.listenTo(this.model.itemCollection, 'update', this.render);
 
       if (this.model.get('dataLoaded')) {
         // Re-render widget without fetching.
-        this.trigger('rerender');
+        this.trigger('widget:rerender');
       }
       else {
         // Fetch collection items.
@@ -77,8 +60,7 @@
      */
     render: function () {
       var widget = this;
-      console.log('[render] shs.WidgetView');
-      widget.$el.attr('id', widget.app.$el.attr('id') + '-shs-' + widget.level)
+      widget.$el.prop('id', widget.app.$el.prop('id') + '-shs-' + widget.model.get('level'))
               .addClass('shs-select')
               // Add core class to apply default styles to the element.
               .addClass('form-select')
@@ -86,20 +68,19 @@
       if (widget.model.get('dataLoaded')) {
         widget.$el.show();
       }
-
-      if (widget.$el.prop) {
-        var options = widget.$el.prop('options');
+      if (widget.app.getSetting('required')) {
+        widget.$el.addClass('required');
       }
-      else {
-        var options = widget.$el.attr('options');
+      if (widget.app.hasError()) {
+        widget.$el.addClass('error');
       }
 
       // Remove all existing options.
       $('option', widget.$el).remove();
 
-      // Add "any" option. @todo
-      if (!widget.config.settings.required) {
-        widget.$el.append($('<option>').text(widget.config.settings.anyLabel).val(widget.config.settings.anyValue));
+      // Add "any" option.
+      if (!widget.app.getSetting('required') || (widget.app.getSetting('required') && (widget.model.get('defaultValue') === widget.app.getSetting('anyValue') || widget.model.get('level') > 0))) {
+        widget.$el.append($('<option>').text(widget.app.getSetting('anyLabel')).val(widget.app.getSetting('anyValue')));
       }
 
       // Create options from collection.
@@ -107,28 +88,33 @@
         if (!item.get('tid')) {
           return;
         }
-        var optionModel = new Drupal.shs.classes[widget.app.config.fieldName].models.widgetItemOption({
+        var optionModel = new Drupal.shs.classes[widget.app.getConfig('fieldName')].models.widgetItemOption({
           label: item.get('name'),
           value: item.get('tid'),
           hasChildren: item.get('hasChildren')
         });
-        var option = new Drupal.shs.classes[widget.app.config.fieldName].views.widgetItem({
+        var option = new Drupal.shs.classes[widget.app.getConfig('fieldName')].views.widgetItem({
           model: optionModel
         });
         widget.$el.append(option.render().$el);
       });
 
+      if (widget.model.itemCollection.length === 0 && !widget.app.getSetting('create_new_levels')) {
+        // Do not add the widget to the application container.
+        return widget;
+      }
+
       // Set default value of widget.
       widget.$el.val(widget.model.get('defaultValue'));
 
-      var $container = $($('.shs-widget-container', $(widget.app.container)).get(widget.level));
+      var $container = $('.shs-widget-container[data-shs-level="' + widget.model.get('level') + '"]', $(widget.app.container));
       // Add widget to container.
       if (widget.model.get('dataLoaded')) {
         // Add element without using any effect.
         $container.append(widget.$el);
       }
       else {
-        $container.append(widget.$el.fadeIn(widget.config.display.animationSpeed));
+        $container.append(widget.$el.fadeIn(widget.app.getConfig('display.animationSpeed')));
       }
 
       widget.model.set('dataLoaded', true);

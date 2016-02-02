@@ -25,8 +25,8 @@
 
       $(context).find('select.shs-enabled:not([disabled])').each(function () {
         var field = this;
-        var config = $.extend({}, drupalSettings.shs[$(this).attr('name')], settingsDefault, {
-          fieldName: $(field).attr('name')
+        var config = $.extend({}, drupalSettings.shs[$(this).prop('name')], settingsDefault, {
+          fieldName: $(field).prop('name')
         });
         // Initialize model and view classes for the field.
         Drupal.behaviors.shs.initClasses(config.fieldName, config.classes);
@@ -51,6 +51,13 @@
     },
     /**
      * Initialize model and widget classes.
+     *
+     * Using the class storage instead of directly calling (i.e.)
+     * <code>new Drupal.shs.WidgetView()</code> allows other modules to
+     * override every part of the widget generation.
+     *
+     * @see hook_shs_class_definitions_alter()
+     * @see hook_shs_FIELDNAME_class_definitions_alter()
      *
      * @param {string} fieldName
      *   Name of field to initialize the classes for.
