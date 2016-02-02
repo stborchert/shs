@@ -20,12 +20,14 @@ function shs_get_class_definitions($field_name) {
   $definitions = [
     'models' => [
       'app' => 'Drupal.shs.AppModel',
+      'container' => 'Drupal.shs.ContainerModel',
       'widget' => 'Drupal.shs.WidgetModel',
       'widgetItem' => 'Drupal.shs.WidgetItemModel',
       'widgetItemOption' => 'Drupal.shs.WidgetItemOptionModel',
     ],
     'views' => [
       'app' => 'Drupal.shs.AppView',
+      'container' => 'Drupal.shs.ContainerView',
       'widget' => 'Drupal.shs.WidgetView',
       'widgetItem' => 'Drupal.shs.WidgetItemView',
     ],

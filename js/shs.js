@@ -25,11 +25,20 @@
 
       $(context).find('select.shs-enabled:not([disabled])').each(function () {
         var field = this;
-        var config = $.extend({}, drupalSettings.shs[$(this).prop('name')], settingsDefault, {
-          fieldName: $(field).prop('name')
+        var field_name = $(field).prop('name');
+        if (!drupalSettings.hasOwnProperty('shs') || !drupalSettings.shs.hasOwnProperty(field_name)) {
+          return;
+        }
+
+        var config = $.extend({}, drupalSettings.shs[$(field).prop('name')], settingsDefault, {
+          fieldName: field_name
         });
         // Initialize model and view classes for the field.
         Drupal.behaviors.shs.initClasses(config.fieldName, config.classes);
+
+        if (!Drupal.shs.classes[config.fieldName].hasOwnProperty('models')) {
+          return;
+        }
 
         // Initialize application model.
         var app_model = new Drupal.shs.classes[config.fieldName].models.app({

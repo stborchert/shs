@@ -129,8 +129,8 @@ class OptionsShsWidget extends OptionsSelectWidget {
     }
     $target_bundles = $this->getFieldSetting('handler_settings')['target_bundles'];
     $settings_additional = [
-      'required' => $element['#required'],
-      'multiple' => $element['#multiple'],
+      'required' => $this->required,
+      'multiple' => $this->multiple,
       'anyLabel' => $this->getEmptyLabel() ?: t('- None -'),
       'anyValue' => '_none',
     ];

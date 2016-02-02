@@ -7,11 +7,13 @@ shs.form:
     js/shs.js: {}
     # Models.
     js/models/AppModel.js: {}
+    js/models/ContainerModel.js: {}
     js/models/WidgetModel.js: {}
     js/models/WidgetItemModel.js: {}
     js/models/WidgetItemOptionModel.js: {}
     # Views.
     js/views/AppView.js: {}
+    js/views/ContainerView.js: {}
     js/views/WidgetView.js: {}
     js/views/WidgetItemView.js: {}
   dependencies:

@@ -8,12 +8,13 @@
   'use strict';
 
   Drupal.shs.WidgetView = Backbone.View.extend(/** @lends Drupal.shs.WidgetView# */{
+
     /**
-     * The main application.
+     * The enclosing container.
      *
-     * @type {Drupal.shs.AppView}
+     * @type {Drupal.shs.ContainerView}
      */
-    app: null,
+    container: null,
     /**
      * Default tagname of this view.
      *
@@ -34,12 +35,12 @@
      * @augments Backbone.View
      */
     initialize: function (options) {
-      this.app = options.app;
+      this.container = options.container;
 
       if (!this.model.get('dataLoaded')) {
         // Create new item collection.
         this.model.itemCollection = new Drupal.shs.WidgetItemCollection({
-          url: this.app.getConfig('baseUrl') + '/' + this.app.getConfig('bundle') + '/' + this.model.get('id')
+          url: this.container.app.getConfig('baseUrl') + '/' + this.container.app.getConfig('bundle') + '/' + this.model.get('id')
         });
       }
 
@@ -60,7 +61,7 @@
      */
     render: function () {
       var widget = this;
-      widget.$el.prop('id', widget.app.$el.prop('id') + '-shs-' + widget.model.get('level'))
+      widget.$el.prop('id', widget.container.app.$el.prop('id') + '-shs-' + widget.model.get('level'))
               .addClass('shs-select')
               // Add core class to apply default styles to the element.
               .addClass('form-select')
@@ -68,10 +69,10 @@
       if (widget.model.get('dataLoaded')) {
         widget.$el.show();
       }
-      if (widget.app.getSetting('required')) {
+      if (widget.container.app.getSetting('required')) {
         widget.$el.addClass('required');
       }
-      if (widget.app.hasError()) {
+      if (widget.container.app.hasError()) {
         widget.$el.addClass('error');
       }
 
@@ -79,8 +80,8 @@
       $('option', widget.$el).remove();
 
       // Add "any" option.
-      if (!widget.app.getSetting('required') || (widget.app.getSetting('required') && (widget.model.get('defaultValue') === widget.app.getSetting('anyValue') || widget.model.get('level') > 0))) {
-        widget.$el.append($('<option>').text(widget.app.getSetting('anyLabel')).val(widget.app.getSetting('anyValue')));
+      if (!widget.container.app.getSetting('required') || (widget.container.app.getSetting('required') && (widget.model.get('defaultValue') === widget.container.app.getSetting('anyValue') || widget.model.get('level') > 0))) {
+        widget.$el.append($('<option>').text(widget.container.app.getSetting('anyLabel')).val(widget.container.app.getSetting('anyValue')));
       }
 
       // Create options from collection.
@@ -88,18 +89,18 @@
         if (!item.get('tid')) {
           return;
         }
-        var optionModel = new Drupal.shs.classes[widget.app.getConfig('fieldName')].models.widgetItemOption({
+        var optionModel = new Drupal.shs.classes[widget.container.app.getConfig('fieldName')].models.widgetItemOption({
           label: item.get('name'),
           value: item.get('tid'),
           hasChildren: item.get('hasChildren')
         });
-        var option = new Drupal.shs.classes[widget.app.getConfig('fieldName')].views.widgetItem({
+        var option = new Drupal.shs.classes[widget.container.app.getConfig('fieldName')].views.widgetItem({
           model: optionModel
         });
         widget.$el.append(option.render().$el);
       });
 
-      if (widget.model.itemCollection.length === 0 && !widget.app.getSetting('create_new_levels')) {
+      if (widget.model.itemCollection.length === 0 && !widget.container.app.getSetting('create_new_levels')) {
         // Do not add the widget to the application container.
         return widget;
       }
@@ -107,14 +108,14 @@
       // Set default value of widget.
       widget.$el.val(widget.model.get('defaultValue'));
 
-      var $container = $('.shs-widget-container[data-shs-level="' + widget.model.get('level') + '"]', $(widget.app.container));
+      var $container = $('.shs-widget-container[data-shs-level="' + widget.model.get('level') + '"]', $(widget.container.app.container));
       // Add widget to container.
       if (widget.model.get('dataLoaded')) {
         // Add element without using any effect.
         $container.append(widget.$el);
       }
       else {
-        $container.append(widget.$el.fadeIn(widget.app.getConfig('display.animationSpeed')));
+        $container.append(widget.$el.fadeIn(widget.container.app.getConfig('display.animationSpeed')));
       }
 
       widget.model.set('dataLoaded', true);
@@ -129,8 +130,7 @@
       // Update default value of attached model.
       this.model.set('defaultValue', value);
       // Fire events.
-      $(document).trigger('shsWidgetSelectionChange', this.model, value, this.app);
-      this.app.collection.trigger('update:selection', this.model, value, this);
+      this.container.collection.trigger('update:selection', this.model, value, this);
     }
 
   });

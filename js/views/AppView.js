@@ -34,15 +34,14 @@
       // Track app state.
       this.config = this.model.get('config');
 
-      this.$el.once('shs').addClass('hidden');
-
-      this.collection = new Drupal.shs.WidgetCollection({
-        url: this.getConfig('baseUrl') + '/' + this.getConfig('bundle')
-      });
+      // Initialize collection.
+      this.collection = new Drupal.shs.ContainerCollection();
       this.collection.reset();
+
+      // Initialize event listeners.
       this.listenTo(this.collection, 'initialize', this.renderWidgets);
-      this.listenTo(this.collection, 'update:selection', this.selectionUpdate);
-      this.listenTo(this.collection, 'update:value', this.update);
+
+      this.$el.once('shs').addClass('hidden');
     },
     /**
      * Main render function of Simple hierarchical select.
@@ -55,18 +54,18 @@
 
       // Create container for widgets.
       app.container = $('<div>')
-              .addClass('shs-field-container')
+              .addClass('shs-container')
               .html('')
               .insertBefore(app.$el);
 
-      $.each(app.getConfig('parents'), function (index, item) {
-        // Add WidgetModel for each parent.
-        app.collection.add(new Drupal.shs.classes[app.getConfig('fieldName')].models.widget({
-          id: item.parent,
-          defaultValue: item.defaultValue,
-          level: index
-        }));
-      });
+      // @todo
+      app.collection.add(new Drupal.shs.classes[app.getConfig('fieldName')].models.container({
+        delta: 0,
+        parents: app.getConfig('parents')
+      }));
+//      $.each(app.getConfig('parents'), function (index, item) {
+//        // Add WidgetModel for each parent.
+//      });
 
       app.collection.trigger('initialize');
 
@@ -80,67 +79,41 @@
      */
     renderWidgets: function () {
       var app = this;
-      $(app.container).html('');
-      app.collection.each(function (widgetModel) {
-        // Create container for widget.
-        $(app.container).append($('<div>').addClass('shs-widget-container').attr('data-shs-level', widgetModel.get('level')));
-        // Create widget.
-        new Drupal.shs.classes[app.getConfig('fieldName')].views.widget({
+      app.collection.each(function (containerModel) {
+        // Create widget container.
+        var container = new Drupal.shs.classes[app.getConfig('fieldName')].views.container({
           app: app,
-          model: widgetModel
+          model: containerModel
         });
+
+        app.container.append(container.render().$el);
       });
+
       return app;
-    },
-    /**
-     * Rebuild widgets based on changed selection.
-     *
-     * @param {Drupal.shs.WidgetModel} widgetModel
-     *   The changed model.
-     * @param {string} value
-     *   New value of WidgetView
-     * @param {Drupal.shs.WidgetView} widgetView
-     *   View displaying the model.
-     */
-    selectionUpdate: function (widgetModel, value, widgetView) {
-      var app = this;
-      // Find all WidgetModels with a higher level than the changed model.
-      var models = _.filter(this.collection.models, function (model) {
-        return model.get('level') > widgetModel.get('level');
-      });
-      // Remove the found models from the collection.
-      $.each(models, function (index, model) {
-        app.collection.remove(model);
-      });
-
-      if (value !== app.getSetting('anyValue')) {
-        // Add new model with current selection.
-        app.collection.add(new Drupal.shs.classes[app.getConfig('fieldName')].models.widget({
-          id: value,
-          level: widgetModel.get('level') + 1
-        }));
-      }
-      // Trigger value update.
-      app.collection.trigger('update:value', widgetModel, value);
-
-      // Trigger events.
-      app.collection.trigger('initialize');
     },
     /**
      * Update the value of the original element.
      *
-     * @param {Drupal.shs.WidgetModel} widgetModel
-     *   The changed model.
      * @param {string} value
      *   New value of element.
+     * @param {Drupal.shs.ContainerModel} container
+     *   Container where the update happened.
+     * @param {Drupal.shs.WidgetModel} widget
+     *   The changed model.
      */
-    update: function(widgetModel, value) {
+    updateElementValue: function(value, container, widget) {
       var app = this;
-      if (value === app.getSetting('anyValue') && widgetModel.get('level') > 0) {
-        // Use value of parent widget (which is the id of the model ;)).
-        value = widgetModel.get('id');
+
+      if (app.getSetting('multiple')) {
+        app.collection.each(function (containerModel) {
+
+        });
       }
-      this.$el.val(value);
+      else {
+        // Simply set the updated value.
+        app.$el.val(value);
+      }
+      return app;
     },
     /**
      * Check if original widget reports an error.
@@ -204,17 +177,11 @@
    *
    * @augments Backbone.Collection
    */
-  Drupal.shs.WidgetCollection = Backbone.Collection.extend(/** @lends Drupal.shs.WidgetCollection */{
+  Drupal.shs.ContainerCollection = Backbone.Collection.extend(/** @lends Drupal.shs.ContainerCollection */{
     /**
-     * @type {Drupal.shs.WidgetModel}
+     * @type {Drupal.shs.ContainerModel}
      */
-    model: Drupal.shs.WidgetModel,
-    /**
-     * {@inheritdoc}
-     */
-    initialize: function (options) {
-      this.url = options.url;
-    }
+    model: Drupal.shs.ContainerModel
   });
 
 }(jQuery, _, Backbone, Drupal));
