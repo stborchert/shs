@@ -50,12 +50,14 @@ class OptionsShsWidget extends OptionsSelectWidget {
       '#title' => t('Display number of nodes'),
       '#default_value' => $this->getSetting('display_node_count'),
       '#description' => t('Display the number of nodes associated with each term.'),
+      '#disabled' => TRUE,
     ];
     $element['create_new_items'] = [
       '#type' => 'checkbox',
       '#title' => t('Allow creating new items'),
       '#default_value' => $this->getSetting('create_new_items'),
       '#description' => t('Allow users to create new items of the source bundle.'),
+      '#disabled' => TRUE,
     ];
     $element['create_new_levels'] = [
       '#type' => 'checkbox',
@@ -67,12 +69,14 @@ class OptionsShsWidget extends OptionsSelectWidget {
           ':input[name="fields[' . $field_name . '][settings_edit_form][settings][create_new_items]"]' => ['checked' => TRUE],
         ],
       ],
+      '#disabled' => TRUE,
     ];
     $element['force_deepest'] = [
       '#type' => 'checkbox',
       '#title' => t('Force selection of deepest level'),
       '#default_value' => $this->getSetting('force_deepest'),
       '#description' => t('Force users to select terms from the deepest level.'),
+      '#disabled' => TRUE,
     ];
 
     return $element;

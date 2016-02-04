@@ -37,6 +37,20 @@ work properly.
     Force users to select items from the deepest level.
 
 
+-- MISSING FEATURES --
+
+* Form display settings:
+  These options are current disabled because the underlying features are not
+  implemented yet. This will be done until version 8.x-1.0.
+* Chosen/Select2/similar integration:
+  Chosen is not ready for Drupal 8 yet so this will take a while.
+  Luckily there is no need for special modifications of the code because custom
+  modules may override every single javascript class used by "SHS" to generate
+  its widgets.
+  I hope to create a sub-module "shs_select2" for version 8.x-1.0 that renders
+  the widgets as select2-items.
+
+
 -- CONTACT --
 
 Current maintainers:
