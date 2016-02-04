@@ -22,6 +22,7 @@
      * @prop {integer} tid
      * @prop {string} langcode
      * @prop {string} name
+     * @prop {string} description
      */
     defaults: /** @lends Drupal.shs.WidgetItemModel# */{
 
