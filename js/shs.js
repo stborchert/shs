@@ -20,17 +20,19 @@
       var settingsDefault = {
         display: {
           animationSpeed: 400,
-        }
+          labelsOnEveryLevel: false
+        },
+        labels: []
       };
 
-      $(context).find('select.shs-enabled:not([disabled])').each(function () {
+      $(context).find('select.shs-enabled:not([disabled])').not('.shs-processed').addClass('shs-processed').each(function () {
         var field = this;
-        var field_name = $(field).prop('name');
+        var field_name = $(field).prop('name').replace('[]', '');
         if (!drupalSettings.hasOwnProperty('shs') || !drupalSettings.shs.hasOwnProperty(field_name)) {
           return;
         }
 
-        var config = $.extend({}, drupalSettings.shs[$(field).prop('name')], settingsDefault, {
+        var config = $.extend({}, settingsDefault, drupalSettings.shs[field_name], {
           fieldName: field_name
         });
         // Initialize model and view classes for the field.

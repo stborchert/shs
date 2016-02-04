@@ -32,7 +32,7 @@ class OptionsShsWidget extends OptionsSelectWidget {
   public static function defaultSettings() {
     $settings_default = [
       'display_node_count' => FALSE,
-      'create_new_terms' => FALSE,
+      'create_new_items' => FALSE,
       'create_new_levels' => FALSE,
       'force_deepest' => FALSE,
     ];
@@ -51,11 +51,11 @@ class OptionsShsWidget extends OptionsSelectWidget {
       '#default_value' => $this->getSetting('display_node_count'),
       '#description' => t('Display the number of nodes associated with each term.'),
     ];
-    $element['create_new_terms'] = [
+    $element['create_new_items'] = [
       '#type' => 'checkbox',
-      '#title' => t('Allow creating new terms'),
-      '#default_value' => $this->getSetting('create_new_terms'),
-      '#description' => t('Allow users to create new terms in the source vocabulary.'),
+      '#title' => t('Allow creating new items'),
+      '#default_value' => $this->getSetting('create_new_items'),
+      '#description' => t('Allow users to create new items of the source bundle.'),
     ];
     $element['create_new_levels'] = [
       '#type' => 'checkbox',
@@ -64,7 +64,7 @@ class OptionsShsWidget extends OptionsSelectWidget {
       '#description' => t('Allow users to create new children for items which do not have any children yet.'),
       '#states' => [
         'visible' => [
-          ':input[name="fields[' . $field_name . '][settings_edit_form][settings][create_new_terms]"]' => ['checked' => TRUE],
+          ':input[name="fields[' . $field_name . '][settings_edit_form][settings][create_new_items]"]' => ['checked' => TRUE],
         ],
       ],
     ];
@@ -90,8 +90,8 @@ class OptionsShsWidget extends OptionsSelectWidget {
     else {
       $summary[] = t('Do not display number of nodes');
     }
-    if ($this->getSetting('create_new_terms')) {
-      $summary[] = t('Allow creation of new terms');
+    if ($this->getSetting('create_new_items')) {
+      $summary[] = t('Allow creation of new items');
       if ($this->getSetting('create_new_levels')) {
         $summary[] = t('Allow creation of new levels');
       }
@@ -100,7 +100,7 @@ class OptionsShsWidget extends OptionsSelectWidget {
       }
     }
     else {
-      $summary[] = t('Do not allow creation of new terms');
+      $summary[] = t('Do not allow creation of new items');
     }
     if ($this->getSetting('force_deepest')) {
       $summary[] = t('Force selection of deepest level');
@@ -123,51 +123,53 @@ class OptionsShsWidget extends OptionsSelectWidget {
       return $element;
     }
 
-    $default_value = $element['#default_value'][$delta] ? : NULL;
-    if ($form_state_default = $form_state->getUserInput()[$this->fieldDefinition->getName()]) {
+    $field_name = $this->fieldDefinition->getName();
+    $default_value = $element['#default_value'] ? : NULL;
+    if ($form_state_default = $form_state->getUserInput()[$field_name]) {
       $default_value = $form_state_default;
     }
     $target_bundles = $this->getFieldSetting('handler_settings')['target_bundles'];
     $settings_additional = [
       'required' => $this->required,
       'multiple' => $this->multiple,
-      'anyLabel' => $this->getEmptyLabel() ?: t('- None -'),
+      'anyLabel' => $this->getEmptyLabel() ? : t('- None -'),
       'anyValue' => '_none',
+      'addNewLabel' => t('Add another item'),
     ];
 
+    $bundle = reset($target_bundles);
+
+    // Define default parents for the widget.
     $parents = [
       [
-        'parent' => 0,
-        'defaultValue' => $settings_additional['anyValue'],
+        [
+          'parent' => 0,
+          'defaultValue' => $settings_additional['anyValue'],
+        ]
       ]
     ];
-    if ($default_value && ($settings_additional['anyValue'] !== $default_value)) {
-      try {
-        $storage = \Drupal::entityTypeManager()->getStorage($this->fieldDefinition->getItemDefinition()->getSetting('target_type'));
-        $parent_terms = array_reverse(array_keys($storage->loadAllParents($default_value)));
-        $keys = array_merge([0], $parent_terms);
-        $values = array_merge($parent_terms, [$default_value]);
-        $parents = [];
-        foreach ($keys as $index => $key) {
-          $parents[] = [
-            'parent' => $key,
-            'defaultValue' => $values[$index] ? : $settings_additional['anyValue'],
-          ];
-        }
-      }
-      catch (Exception $ex) {
-
-      }
+    if ($default_value) {
+      $parents = $this->getParents($default_value, $settings_additional);
     }
 
+    $settings_shs = [
+      'settings' => $this->getSettings() + $settings_additional,
+      'bundle' => $bundle,
+      'baseUrl' => $base_url . '/shs-term-data',
+      'cardinality' => $this->fieldDefinition->getFieldStorageDefinition()->getCardinality(),
+      'parents' => $parents,
+      'defaultValue' => $default_value,
+    ];
+
+    $hooks = [
+      'shs_js_settings',
+      "shs_{$field_name}_js_settings",
+    ];
+    // Allow other modules to override the settings.
+    \Drupal::moduleHandler()->alter($hooks, $settings_shs, $bundle, $field_name);
+
     $element += [
-      '#shs' => [
-        'settings' => $this->getSettings() + $settings_additional,
-        'bundle' => reset($target_bundles),
-        'baseUrl' => $base_url . '/shs-term-data',
-        'parents' => $parents,
-        'defaultValue' => $default_value ? : $settings_additional['anyValue'],
-      ],
+      '#shs' => $settings_shs,
     ];
     $element['#attributes'] = $element['#attributes'] ? : [];
     $element['#attributes'] = array_merge($element['#attributes'], [
@@ -207,9 +209,64 @@ class OptionsShsWidget extends OptionsSelectWidget {
   }
 
   /**
+   * Load parents for default values.
+   *
+   * @param array $default_values
+   *   List of default values of the widget.
+   * @param array $settings
+   *   Widget settings.
+   *
+   * @return array
+   *   List of parents for each default value.
+   */
+  protected function getParents($default_values, $settings) {
+    $parents = [];
+    if (!is_array($default_values)) {
+      $default_values = [$default_values];
+    }
+    foreach ($default_values as $delta => $value) {
+      if ($settings['anyValue'] === $value) {
+        $parents[$delta] = [
+          [
+            'parent' => 0,
+            'defaultValue' => $settings['anyValue'],
+          ]
+        ];
+        continue;
+      }
+      try {
+        $storage = \Drupal::entityTypeManager()->getStorage($this->fieldDefinition->getItemDefinition()->getSetting('target_type'));
+        $parent_terms = array_reverse(array_keys($storage->loadAllParents($value)));
+        $keys = array_merge([0], $parent_terms);
+        $values = array_merge($parent_terms, [$value]);
+        $parents[$delta] = [];
+        foreach ($keys as $index => $key) {
+          $parents[$delta][] = [
+            'parent' => $key,
+            'defaultValue' => $values[$index] ? : $settings['anyValue'],
+          ];
+        }
+      }
+      catch (Exception $ex) {
+        $parents[$delta] = [
+          [
+            'parent' => 0,
+            'defaultValue' => $settings['anyValue'],
+          ]
+        ];
+      }
+    }
+    return $parents;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public static function isApplicable(FieldDefinitionInterface $field_definition) {
+    // The widget currently only works for taxonomy terms.
+    if (strpos($field_definition->getSetting('handler'), 'taxonomy_term') === FALSE) {
+      return FALSE;
+    }
     // The widget only works with fields having one target bundle as source.
     return count($field_definition->getSetting('handler_settings')['target_bundles']) === 1;
   }

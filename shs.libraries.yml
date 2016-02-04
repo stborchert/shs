@@ -13,6 +13,7 @@ shs.form:
     js/models/WidgetItemOptionModel.js: {}
     # Views.
     js/views/AppView.js: {}
+    js/views/AddNewView.js: {}
     js/views/ContainerView.js: {}
     js/views/WidgetView.js: {}
     js/views/WidgetItemView.js: {}

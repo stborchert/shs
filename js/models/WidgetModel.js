@@ -16,30 +16,35 @@
    * @augments Backbone.Model
    */
   Drupal.shs.WidgetModel = Backbone.Model.extend(/** @lends Drupal.shs.WidgetModel# */{
+
     /**
      * @type {object}
      *
      * @prop {object} items
      */
     defaults: /** @lends Drupal.shs.WidgetModel# */{
+
       /**
        * Default value of widget.
        *
        * @type {string}
        */
       defaultValue: '_none',
+
       /**
        * Position of widget in app.
        *
        * @type {integer}
        */
       level: 0,
+
       /**
        * Collection of items in widget (options).
        *
        * @type {Drupal.shs.WidgetItemCollection}
        */
       itemCollection: null,
+
       /**
        * Indicator whether data for this model has been loaded already.
        *
@@ -47,6 +52,7 @@
        */
       dataLoaded: false
     },
+
     /**
      * {@inheritdoc}
      */

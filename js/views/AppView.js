@@ -39,7 +39,7 @@
       this.collection.reset();
 
       // Initialize event listeners.
-      this.listenTo(this.collection, 'initialize', this.renderWidgets);
+      this.listenTo(this.collection, 'initialize:shs', this.renderWidgets);
 
       this.$el.once('shs').addClass('hidden');
     },
@@ -52,22 +52,24 @@
     render: function () {
       var app = this;
 
-      // Create container for widgets.
+      // Create application container.
       app.container = $('<div>')
               .addClass('shs-container')
               .html('')
               .insertBefore(app.$el);
 
-      // @todo
-      app.collection.add(new Drupal.shs.classes[app.getConfig('fieldName')].models.container({
-        delta: 0,
-        parents: app.getConfig('parents')
-      }));
+      // Generate widget containers.
+      $.each(app.getConfig('parents'), function (delta, parents) {
+        app.collection.add(new Drupal.shs.classes[app.getConfig('fieldName')].models.container({
+          delta: delta,
+          parents: parents
+        }));
+      });
 //      $.each(app.getConfig('parents'), function (index, item) {
 //        // Add WidgetModel for each parent.
 //      });
 
-      app.collection.trigger('initialize');
+      app.collection.trigger('initialize:shs');
 
       return app;
     },
@@ -79,16 +81,22 @@
      */
     renderWidgets: function () {
       var app = this;
+      var fieldName = app.getConfig('fieldName');
+      // Create widget containers.
       app.collection.each(function (containerModel) {
-        // Create widget container.
-        var container = new Drupal.shs.classes[app.getConfig('fieldName')].views.container({
+        var container = new Drupal.shs.classes[fieldName].views.container({
           app: app,
           model: containerModel
         });
 
         app.container.append(container.render().$el);
       });
+      // Create button for "Add new".
+      new Drupal.shs.classes[fieldName].views.addNew({
+        app: app
+      });
 
+      app.collection.trigger('widgetsRendered:shs');
       return app;
     },
     /**
@@ -96,23 +104,32 @@
      *
      * @param {string} value
      *   New value of element.
-     * @param {Drupal.shs.ContainerModel} container
-     *   Container where the update happened.
-     * @param {Drupal.shs.WidgetModel} widget
+     * @param {Drupal.shs.ContainerView} container
+     *   Updated container.
+     * @param {Drupal.shs.WidgetModel} widgetModel
      *   The changed model.
      */
-    updateElementValue: function(value, container, widget) {
+    updateElementValue: function(value, container, widgetModel) {
       var app = this;
 
       if (app.getSetting('multiple')) {
-        app.collection.each(function (containerModel) {
-
+        value = [];
+        app.collection.each(function (model) {
+          var modelValue = model.get('value');
+          if (typeof modelValue == undefined || null == modelValue || modelValue === app.getSetting('anyValue')) {
+            return;
+          }
+          value.push(modelValue);
         });
       }
       else {
-        // Simply set the updated value.
-        app.$el.val(value);
+        if (value === app.getSetting('anyValue') && widgetModel.get('level') > 0) {
+          // Use value of parent widget (which is the id of the model ;)).
+          value = widgetModel.get('id');
+        }
       }
+      // Set the updated value.
+      app.$el.val(value);
       return app;
     },
     /**

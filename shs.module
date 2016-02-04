@@ -27,6 +27,7 @@ function shs_get_class_definitions($field_name) {
     ],
     'views' => [
       'app' => 'Drupal.shs.AppView',
+      'addNew' => 'Drupal.shs.AddNewView',
       'container' => 'Drupal.shs.ContainerView',
       'widget' => 'Drupal.shs.WidgetView',
       'widgetItem' => 'Drupal.shs.WidgetItemView',

@@ -100,15 +100,28 @@
         widget.$el.append(option.render().$el);
       });
 
+      var $container = $('.shs-widget-container[data-shs-level="' + widget.model.get('level') + '"]', widget.container.$el);
       if (widget.model.itemCollection.length === 0 && !widget.container.app.getSetting('create_new_levels')) {
-        // Do not add the widget to the application container.
+        // Do not create the widget.
+        $container.remove();
         return widget;
+      }
+
+      // Create label if necessary.
+      if ((widget.container.model.get('delta') === 0) || widget.container.app.getConfig('display.labelsOnEveryLevel')) {
+        var labels = widget.container.app.getConfig('labels') || [];
+        var label = false;
+        if (labels.hasOwnProperty(widget.model.get('level')) && (label = labels[widget.model.get('level')]) !== false) {
+          $('<label>')
+                  .prop('for', widget.$el.prop('id'))
+                  .text(label)
+                  .appendTo($container);
+        }
       }
 
       // Set default value of widget.
       widget.$el.val(widget.model.get('defaultValue'));
 
-      var $container = $('.shs-widget-container[data-shs-level="' + widget.model.get('level') + '"]', $(widget.container.app.container));
       // Add widget to container.
       if (widget.model.get('dataLoaded')) {
         // Add element without using any effect.

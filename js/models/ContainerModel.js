@@ -35,7 +35,12 @@
        *
        * @type {array}
        */
-      parents: []
+      parents: [],
+
+      /**
+       * The current value within the container.
+       */
+      value: null
 
     }
 

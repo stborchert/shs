@@ -29,18 +29,24 @@
      *
      * @param {object} options
      *   An object with the following keys:
-     * @param {Drupal.shs.AppModel} options.model
-     *   The application state model.
+     * @param {Drupal.shs.AppView} options.app
+     *   The application state view.
      */
     initialize: function (options) {
       this.app = options.app;
+
+      // Set default value.
+      var defaultValue = this.app.getConfig('defaultValue');
+      if (null !== defaultValue && defaultValue.hasOwnProperty(this.model.get('delta'))) {
+        this.model.set('value', this.app.getConfig('defaultValue')[this.model.get('delta')]);
+      }
 
       this.collection = new Drupal.shs.WidgetCollection({
         url: this.app.getConfig('baseUrl') + '/' + this.app.getConfig('bundle')
       });
       this.collection.reset();
 
-      this.listenTo(this.collection, 'initialize', this.renderWidgets);
+      this.listenTo(this.collection, 'initialize:shs-container', this.renderWidgets);
       this.listenTo(this.collection, 'update:selection', this.selectionUpdate);
       this.listenTo(this.collection, 'update:value', this.broadcastUpdate);
     },
@@ -67,7 +73,8 @@
         }));
       });
 
-      container.collection.trigger('initialize');
+      // Trigger events.
+      container.collection.trigger('initialize:shs-container');
 
       return container;
     },
@@ -111,18 +118,36 @@
       // Remove the found models from the collection.
       container.collection.remove(models);
 
-      if (value !== container.app.getSetting('anyValue')) {
+      var anyValue = container.app.getSetting('anyValue');
+      if (value !== anyValue) {
         // Add new model with current selection.
         container.collection.add(new Drupal.shs.classes[container.app.getConfig('fieldName')].models.widget({
           id: value,
           level: widgetModel.get('level') + 1
         }));
       }
+      if (value === anyValue && widgetModel.get('level') > 0) {
+        // Use value of parent widget (which is the id of the model ;)).
+        value = widgetModel.get('id');
+      }
+
+      // Update parents.
+      var parents = [];
+      var previousParent = 0;
+      container.collection.each(function (widgetModel) {
+        parents.push({
+          defaultValue: widgetModel.get('defaultValue'),
+          parent: previousParent
+        });
+        previousParent = widgetModel.get('defaultValue');
+      });
+      container.model.set('parents', parents);
+      container.model.set('value', value);
       // Trigger value update.
       container.collection.trigger('update:value', widgetModel, value);
 
       // Trigger rerender of widgets.
-      container.collection.trigger('initialize');
+      container.collection.trigger('initialize:shs-container');
     },
     /**
      * Broadcast value update to application.
@@ -139,8 +164,8 @@
         value = widgetModel.get('id');
       }
       // Send updated value to application.
-      app.updateElementValue(value, this.model, widgetModel);
-    },
+      app.updateElementValue(value, this, widgetModel);
+    }
   });
 
   /**
