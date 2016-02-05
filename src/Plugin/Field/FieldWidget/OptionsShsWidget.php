@@ -175,11 +175,15 @@ class OptionsShsWidget extends OptionsSelectWidget {
     $element += [
       '#shs' => $settings_shs,
     ];
-    $element['#attributes'] = $element['#attributes'] ? : [];
+    if (empty($element['#attributes'])) {
+      $element['#attributes'] = [];
+    }
     $element['#attributes'] = array_merge($element['#attributes'], [
       'class' => ['shs-enabled'],
     ]);
-    $element['#attached'] = $element['#attached'] ? : [];
+    if (empty($element['#attached'])) {
+      $element['#attached'] = [];
+    }
     $element['#attached'] = array_merge($element['#attached'], [
       'library' => ['shs/shs.form'],
     ]);
