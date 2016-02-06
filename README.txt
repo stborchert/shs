@@ -7,8 +7,8 @@ hierarchical selects on entity forms and as exposed filter in views.
 
 -- REQUIREMENTS --
 
-The modules "Taxonomy" and "Views" (Drupal core) needs to be enabled for SHS to
-work properly.
+The module "Taxonomy" (Drupal core) needs to be enabled for SHS to work
+properly.
 
 
 -- INSTALLATION --
@@ -35,6 +35,17 @@ work properly.
     able to create a new item as child of the currently selected item.
   - "Force selection of deepest level"
     Force users to select items from the deepest level.
+
+
+-- INTERGRATION WITH OTHER MODULES --
+
+
+ * Views (Drupal core)
+   - You are able to use the Simple hierarchical select widget as an exposed
+     filter in Views.
+     Simply add a filter for your term reference field or a term reference
+     filter ("Has taxonomy terms" or "Has taxonomy  terms (with depth)") in your
+     view and select "Simple hierarchical select" as selection type.
 
 
 -- MISSING FEATURES --

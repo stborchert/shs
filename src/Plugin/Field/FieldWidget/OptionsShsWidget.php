@@ -154,7 +154,7 @@ class OptionsShsWidget extends OptionsSelectWidget {
       ]
     ];
     if ($default_value) {
-      $parents = $this->getParents($default_value, $settings_additional);
+      $parents = shs_term_get_parents($default_value, $settings_additional, $this->fieldDefinition->getItemDefinition()->getSetting('target_type'));
     }
 
     $settings_shs = [
@@ -222,57 +222,6 @@ class OptionsShsWidget extends OptionsSelectWidget {
     ]);
 
     return $element;
-  }
-
-  /**
-   * Load parents for default values.
-   *
-   * @param array $default_values
-   *   List of default values of the widget.
-   * @param array $settings
-   *   Widget settings.
-   *
-   * @return array
-   *   List of parents for each default value.
-   */
-  protected function getParents($default_values, $settings) {
-    $parents = [];
-    if (!is_array($default_values)) {
-      $default_values = [$default_values];
-    }
-    foreach ($default_values as $delta => $value) {
-      if ($settings['anyValue'] === $value) {
-        $parents[$delta] = [
-          [
-            'parent' => 0,
-            'defaultValue' => $settings['anyValue'],
-          ]
-        ];
-        continue;
-      }
-      try {
-        $storage = \Drupal::entityTypeManager()->getStorage($this->fieldDefinition->getItemDefinition()->getSetting('target_type'));
-        $parent_terms = array_reverse(array_keys($storage->loadAllParents($value)));
-        $keys = array_merge([0], $parent_terms);
-        $values = array_merge($parent_terms, [$value]);
-        $parents[$delta] = [];
-        foreach ($keys as $index => $key) {
-          $parents[$delta][] = [
-            'parent' => $key,
-            'defaultValue' => $values[$index] ? : $settings['anyValue'],
-          ];
-        }
-      }
-      catch (Exception $ex) {
-        $parents[$delta] = [
-          [
-            'parent' => 0,
-            'defaultValue' => $settings['anyValue'],
-          ]
-        ];
-      }
-    }
-    return $parents;
   }
 
   /**
