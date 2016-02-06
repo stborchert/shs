@@ -27,7 +27,7 @@
 
       $(context).find('select.shs-enabled:not([disabled])').not('.shs-processed').addClass('shs-processed').each(function () {
         var field = this;
-        var field_name = $(field).prop('name').replace('[]', '');
+        var field_name = $(field).attr('data-shs-selector');
         if (!drupalSettings.hasOwnProperty('shs') || !drupalSettings.shs.hasOwnProperty(field_name)) {
           return;
         }

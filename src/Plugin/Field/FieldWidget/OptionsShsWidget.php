@@ -7,6 +7,7 @@
 
 namespace Drupal\shs\Plugin\Field\FieldWidget;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsSelectWidget;
@@ -201,6 +202,13 @@ class OptionsShsWidget extends OptionsSelectWidget {
       // about SHS (i.e. on field config forms).
       return $element;
     }
+
+    // Create unique key for field.
+    $element_key = Html::getUniqueId(sprintf('shs-%s', $element['#field_name']));
+    $element['#attributes'] = array_merge($element['#attributes'], [
+      'data-shs-selector' => $element_key,
+    ]);
+
     $element['#shs'] += [
       'classes' => shs_get_class_definitions($element['#field_name']),
     ];
@@ -208,7 +216,7 @@ class OptionsShsWidget extends OptionsSelectWidget {
     $element['#attached'] = array_merge($element['#attached'], [
       'drupalSettings' => [
         'shs' => [
-          $element['#field_name'] => $element['#shs'],
+          $element_key => $element['#shs'],
         ],
       ],
     ]);
