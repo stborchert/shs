@@ -23,10 +23,6 @@ properly.
   "Simple hierarchical select" on the form display settings for the new field.
 
 * Form display settings
-  - "Display number of nodes"
-    Displays the number of nodes associated to a term.
-    WARNING: on sites with a lot of terms and nodes this can be a great
-    performance killer (even if the data is cached).
   - "Allow creating new items"
     Items may be created directly from within the widget (user needs to have
     permission to create items in the configured bundle).
@@ -38,7 +34,6 @@ properly.
 
 
 -- INTERGRATION WITH OTHER MODULES --
-
 
  * Views (Drupal core)
    - You are able to use the Simple hierarchical select widget as an exposed

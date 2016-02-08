@@ -46,13 +46,6 @@ class OptionsShsWidget extends OptionsSelectWidget {
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $field_name = $this->fieldDefinition->getName();
 
-    $element['display_node_count'] = [
-      '#type' => 'checkbox',
-      '#title' => t('Display number of nodes'),
-      '#default_value' => $this->getSetting('display_node_count'),
-      '#description' => t('Display the number of nodes associated with each term.'),
-      '#disabled' => TRUE,
-    ];
     $element['create_new_items'] = [
       '#type' => 'checkbox',
       '#title' => t('Allow creating new items'),
@@ -89,12 +82,6 @@ class OptionsShsWidget extends OptionsSelectWidget {
   public function settingsSummary() {
     $summary = parent::settingsSummary();
 
-    if ($this->getSetting('display_node_count')) {
-      $summary[] = t('Display number of nodes');
-    }
-    else {
-      $summary[] = t('Do not display number of nodes');
-    }
     if ($this->getSetting('create_new_items')) {
       $summary[] = t('Allow creation of new items');
       if ($this->getSetting('create_new_levels')) {
