@@ -1,5 +1,5 @@
 shs.term_data:
-  path: '/shs-term-data/{bundle}/{entity_id}'
+  path: '/shs-term-data/{identifier}/{bundle}/{entity_id}'
   defaults:
     _controller: '\Drupal\shs\Controller\ShsController::getTermData'
     _title: 'Get term data'

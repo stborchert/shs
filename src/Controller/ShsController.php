@@ -1,14 +1,14 @@
 <?php
 
 /**
- * @file_field_delete_file
+ * @file
  * Contains \Drupal\shs\Controller\ShsController.
  */
 
 namespace Drupal\shs\Controller;
 
-use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\shs\Cache\ShsCacheableJsonResponse;
 use Drupal\shs\Cache\ShsTermCacheDependency;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -34,6 +34,8 @@ class ShsController extends ControllerBase {
   /**
    * Load term data.
    *
+   * @param string $identifier
+   *   Name of field to load the data for.
    * @param string $bundle
    *   Bundle (vocabulary) identifier to limit the return list to a specific
    *   bundle.
@@ -43,8 +45,13 @@ class ShsController extends ControllerBase {
    * @return CacheableJsonResponse
    *   Cacheable Json response.
    */
-  public function getTermData($bundle, $entity_id = 0) {
-    $response = new CacheableJsonResponse();
+  public function getTermData($identifier, $bundle, $entity_id = 0) {
+    $context = [
+      'identifier' => $identifier,
+      'bundle' => $bundle,
+      'parent' => $entity_id,
+    ];
+    $response = new ShsCacheableJsonResponse($context);
 
     $cache_tags = [];
     $result = [];
@@ -64,7 +71,7 @@ class ShsController extends ControllerBase {
     }
 
     $response->addCacheableDependency(new ShsTermCacheDependency($cache_tags));
-    $response->setData($result);
+    $response->setData($result, TRUE);
 
     return $response;
   }
