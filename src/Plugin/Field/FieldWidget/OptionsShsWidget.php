@@ -130,8 +130,9 @@ class OptionsShsWidget extends OptionsSelectWidget {
 
     $field_name = $this->fieldDefinition->getName();
     $default_value = $element['#default_value'] ? : NULL;
-    if ($form_state_default = $form_state->getUserInput()[$field_name]) {
-      $default_value = $form_state_default;
+    $user_input = $form_state->getUserInput();
+    if (isset($user_input[$field_name])) {
+      $default_value = $user_input[$field_name];
     }
     $target_bundles = $this->getFieldSetting('handler_settings')['target_bundles'];
     $settings_additional = [
