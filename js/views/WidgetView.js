@@ -61,7 +61,7 @@
      */
     render: function () {
       var widget = this;
-      widget.$el.prop('id', widget.container.app.$el.prop('id') + '-shs-' + widget.model.get('level'))
+      widget.$el.prop('id', widget.container.app.$el.prop('id') + '-shs-' + widget.container.model.get('delta') + '-' + widget.model.get('level'))
               .addClass('shs-select')
               // Add core class to apply default styles to the element.
               .addClass('form-select')
