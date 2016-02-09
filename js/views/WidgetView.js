@@ -71,6 +71,15 @@
       }
       if (widget.container.app.getSetting('required')) {
         widget.$el.addClass('required');
+        // Add HTML5 required attributes to first level.
+        if (widget.model.get('level') === 0) {
+          widget.$el.attr('required', 'required');
+          widget.$el.attr('aria-required', 'true');
+
+          // Remove attributes from original element!
+          widget.container.app.$el.removeAttr('required');
+          widget.container.app.$el.removeAttr('aria-required');
+        }
       }
       if (widget.container.app.hasError()) {
         widget.$el.addClass('error');

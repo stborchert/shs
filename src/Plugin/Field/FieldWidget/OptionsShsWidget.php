@@ -8,6 +8,7 @@
 namespace Drupal\shs\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Database\Database;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsSelectWidget;
@@ -70,7 +71,6 @@ class OptionsShsWidget extends OptionsSelectWidget {
       '#title' => t('Force selection of deepest level'),
       '#default_value' => $this->getSetting('force_deepest'),
       '#description' => t('Force users to select terms from the deepest level.'),
-      '#disabled' => TRUE,
     ];
 
     return $element;
@@ -222,6 +222,28 @@ class OptionsShsWidget extends OptionsSelectWidget {
     }
     // The widget only works with fields having one target bundle as source.
     return count($field_definition->getSetting('handler_settings')['target_bundles']) === 1;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function validateElement(array $element, FormStateInterface $form_state) {
+    parent::validateElement($element, $form_state);
+    if (empty($element['#shs']['settings']['force_deepest']) || $form_state->hasAnyErrors()) {
+      return;
+    }
+    if (($element['#shs']['settings']['anyValue'] === $element['#value']) && count($element['#options']) > 1) {
+      $form_state->setError($element, t('You need to select a term from the deepest level in field @name.', ['@name' => $element['#title']]));
+      return;
+    }
+    $value = $element['#value'];
+    if (is_array($value)) {
+      $values = array_values($value);
+      $value = reset($values);
+    }
+    if (shs_term_has_children($value)) {
+      $form_state->setError($element, t('You need to select a term from the deepest level in field @name.', ['@name' => $element['#title']]));
+    }
   }
 
   /**

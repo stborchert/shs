@@ -4,6 +4,7 @@
  * @file
  * Main functions and methods for the "Simple hierarchical select" module.
  */
+use Drupal\Core\Database\Database;
 
 /**
  * List all javascript classes used to create models and views in the widget.
@@ -45,53 +46,68 @@ function shs_get_class_definitions($field_name) {
   return $definitions;
 }
 
-  /**
-   * Load parents for default values.
-   *
-   * @param array $default_values
-   *   List of default values of the widget.
-   * @param array $settings
-   *   Widget settings.
-   *
-   * @return array
-   *   List of parents for each default value.
-   */
-  function shs_term_get_parents($default_values, $settings, $target_type) {
-    $parents = [];
-    if (!is_array($default_values)) {
-      $default_values = [$default_values];
-    }
-    foreach ($default_values as $delta => $value) {
-      if ($settings['anyValue'] === $value) {
-        $parents[$delta] = [
-          [
-            'parent' => 0,
-            'defaultValue' => $settings['anyValue'],
-          ]
-        ];
-        continue;
-      }
-      try {
-        $storage = \Drupal::entityTypeManager()->getStorage($target_type);
-        $parent_terms = array_reverse(array_keys($storage->loadAllParents($value)));
-        $keys = array_merge([0], $parent_terms);
-        $values = array_merge($parent_terms, [$value]);
-        $parents[$delta] = [];
-        foreach ($keys as $index => $key) {
-          $parents[$delta][] = [
-            'parent' => $key,
-            'defaultValue' => $values[$index] ? : $settings['anyValue'],
-          ];
-        }
-      }
-      catch (Exception $ex) {
-        $parents[$delta] = [
-          [
-            'parent' => 0,
-            'defaultValue' => $settings['anyValue'],
-          ]
-        ];
-      }
-    }
-    return $parents;
+/**
+ * Load parents for default values.
+ *
+ * @param array $default_values
+ *   List of default values of the widget.
+ * @param array $settings
+ *   Widget settings.
+ *
+ * @return array
+ *   List of parents for each default value.
+ */
+function shs_term_get_parents($default_values, $settings, $target_type) {
+  $parents = [];
+  if (!is_array($default_values)) {
+    $default_values = [$default_values];
   }
+  foreach ($default_values as $delta => $value) {
+    if ($settings['anyValue'] === $value) {
+      $parents[$delta] = [
+        [
+          'parent' => 0,
+          'defaultValue' => $settings['anyValue'],
+        ]
+      ];
+      continue;
+    }
+    try {
+      $storage = Drupal::entityTypeManager()->getStorage($target_type);
+      $parent_terms = array_reverse(array_keys($storage->loadAllParents($value)));
+      $keys = array_merge([0], $parent_terms);
+      $values = array_merge($parent_terms, [$value]);
+      $parents[$delta] = [];
+      foreach ($keys as $index => $key) {
+        $parents[$delta][] = [
+          'parent' => $key,
+          'defaultValue' => $values[$index] ? : $settings['anyValue'],
+        ];
+      }
+    }
+    catch (Exception $ex) {
+      $parents[$delta] = [
+        [
+          'parent' => 0,
+          'defaultValue' => $settings['anyValue'],
+        ]
+      ];
+    }
+  }
+  return $parents;
+}
+
+/**
+ * Determine whether a term has children.
+ *
+ * @param int $tid
+ *   Term ID to check existence of children for.
+ *
+ * @return boolean
+ */
+function shs_term_has_children($tid) {
+  $query = Database::getConnection()->select('taxonomy_term_hierarchy', 'h');
+  $query->condition('h.parent', $tid);
+  $query->addTag('term_access');
+  return ($query->countQuery()->execute()->fetchField() > 0);
+}

@@ -9,6 +9,10 @@
 .shs-widget-container {
   display: inline-block;
 }
+.shs-widget-container .has-children {
+  background: url("../images/arrow.png") no-repeat scroll right center transparent;
+  margin-right: 5px;
+}
 .shs-addnew-container {
   margin-top: .5rem;
 }

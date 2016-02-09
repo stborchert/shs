@@ -66,6 +66,7 @@ class ShsController extends ControllerBase {
         'name' => $term->getName(),
         'description__value' => $term->getDescription(),
         'langcode' => $term->default_langcode,
+        'hasChildren' => shs_term_has_children($term->id()),
       ];
       $cache_tags[] = sprintf('taxonomy_term:%d', $term->id());
     }

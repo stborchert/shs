@@ -38,7 +38,7 @@
       this.$el.text(this.model.get('label'))
               .val(this.model.get('value'));
 
-      if (this.model.hasChildren) {
+      if (this.model.get('hasChildren')) {
         // Add special class.
         this.$el.addClass('has-children');
       }

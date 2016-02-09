@@ -55,6 +55,13 @@
       description: '',
 
       /**
+       * Indicator whether the item has children.
+       *
+       * @type {boolean}
+       */
+      hasChildren: false,
+
+      /**
        * Attribute to use as Id.
        *
        * @type {string}
@@ -78,7 +85,8 @@
         tid: response.tid,
         name: response.name,
         description: response.description__value,
-        langcode: response.langcode
+        langcode: response.langcode,
+        hasChildren: response.hasChildren
       };
     }
   });
